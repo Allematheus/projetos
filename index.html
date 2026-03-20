@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENAI — Gerenciador de Cursos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F3EE;
+  --white: #FFFFFF;
+  --surface: #FDFCFA;
+  --border: #E8E4DC;
+  --border2: #D4CFC4;
+  --text: #1A1916;
+  --text2: #6B6760;
+  --text3: #A8A49E;
+  --accent: #1B4FD8;
+  --accent-light: #EEF2FF;
+  --accent-hover: #1641B5;
+  --green: #166534;
+  --green-bg: #DCFCE7;
+  --green-mid: #16A34A;
+  --amber: #92400E;
+  --amber-bg: #FEF3C7;
+  --amber-mid: #D97706;
+  --red: #991B1B;
+  --red-bg: #FEE2E2;
+  --red-mid: #DC2626;
+  --blue-bg: #DBEAFE;
+  --blue-mid: #2563EB;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 1px 0 var(--border);
+}
+.header-brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.brand-chip {
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #fff; letter-spacing: .01em; }
+.btn-primary:hover { background: var(--accent-hover); box-shadow: 0 3px 10px rgba(27,79,216,.25); }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
+.btn-danger:hover { background: #FECACA; }
+.btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+.btn-icon { padding: 6px; border-radius: 7px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; height: calc(100vh - 52px); overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 200px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  padding: 14px 10px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  margin-top: 20px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sidebar-label::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+  display: block;
+  order: 2;
+}
+.sidebar-label:first-child { margin-top: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all .12s;
+  border: none; background: none; width: 100%; text-align: left;
+  position: relative;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 500;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+.nav-item .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px;
+}
+
+/* ── MAIN ── */
+.main { flex: 1; overflow-y: auto; padding: 22px 28px; }
+
+/* ── VIEW ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── PAGE TITLE ── */
+.page-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px; gap: 16px;
+}
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+}
+.page-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* ── STATS ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: start;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  transition: all .25s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-sm {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: all .25s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-sm:hover, .stat-card:hover { box-shadow: var(--shadow-lg); border-color: var(--border2); }
+.stat-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-value-sm { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; line-height: 1; }
+.stat-sub { font-size: 11.5px; color: var(--text2); margin-top: 5px; }
+.stat-card-total { position: relative; overflow: hidden; transition: border-color .25s; }
+.stat-watermark {
+  position: absolute;
+  right: -8px; bottom: -12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 96px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.055;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -6px;
+  transition: color .25s;
+}
+/* Mini sparkline bar */
+.sparkline { display: flex; gap: 2px; align-items: flex-end; height: 28px; margin-top: 10px; }
+.spark-bar {
+  flex: 1; border-radius: 2px 2px 0 0;
+  min-height: 3px;
+  transition: height .4s ease;
+}
+/* Donut mini */
+.stat-donut-wrap { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); opacity: .85; }
+
+/* ── KANBAN ── */
+.kanban { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; min-height: 400px; }
+.kanban-col {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  min-width: 255px;
+  max-width: 270px;
+  flex-shrink: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+.kanban-col:hover { box-shadow: var(--shadow-lg); }
+.kanban-header {
+  padding: 10px 13px 9px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--white);
+}
+.kanban-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+.kanban-count {
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--accent-light);
+  border: 1px solid rgba(27,79,216,.15);
+  padding: 1px 8px;
+  border-radius: 10px;
+  color: var(--accent);
+}
+.kanban-body { flex: 1; padding: 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; max-height: calc(100vh - 280px); }
+.kanban-empty {
+  text-align: center; padding: 30px 16px;
+  color: var(--text3); font-size: 12px;
+}
+
+/* ── COURSE CARD ── */
+.course-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 13px;
+  cursor: pointer;
+  transition: all .18s cubic-bezier(.4,0,.2,1);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.course-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(27,79,216,.12);
+  transform: translateY(-2px);
+}
+.course-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--border2);
+  transition: background .18s;
+}
+.course-card:hover::before { background: var(--accent); }
+.course-card-title {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 5px;
+  line-height: 1.35;
+  padding-left: 6px;
+}
+.course-card-meta { font-size: 11px; color: var(--text2); display: flex; flex-direction: column; gap: 2px; padding-left: 6px; }
+.course-card-row { display: flex; align-items: center; gap: 4px; }
+.course-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 7px; padding-left: 6px; }
+/* Checklist mini — oculto por padrão, aparece no hover */
+.checklist-mini {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .22s cubic-bezier(.4,0,.2,1), opacity .18s, margin-top .18s;
+  opacity: 0;
+  margin-top: 0;
+}
+.course-card:hover .checklist-mini {
+  max-height: 120px;
+  opacity: 1;
+  margin-top: 8px;
+}
+.progress-mini { margin-top: 6px; padding-left: 6px; }
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.tag-blue { background: var(--blue-bg); color: var(--blue-mid); }
+.tag-green { background: var(--green-bg); color: var(--green-mid); }
+.tag-amber { background: var(--amber-bg); color: var(--amber-mid); }
+.tag-red { background: var(--red-bg); color: var(--red-mid); }
+.tag-gray { background: #F1F0ED; color: var(--text2); }
+
+.checklist-mini { border-top: 1px solid var(--border); padding-top: 7px; }
+.check-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text2);
+  padding: 3px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+.check-row:hover { background: var(--bg); color: var(--text); }
+.check-box-ui {
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--border2);
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.check-box-ui.checked { background: var(--accent); border-color: var(--accent); }
+.check-box-ui.checked::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+.check-text.checked { text-decoration: line-through; color: var(--text3); }
+
+.progress-mini { margin-top: 8px; }
+.progress-bar-bg { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+.progress-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,15,13,.45);
+  backdrop-filter: blur(3px);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(10px);
+  transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--white); z-index: 1;
+}
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+}
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: 7px; border: none;
+  background: var(--bg); cursor: pointer;
+  font-size: 16px; color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 8px;
+  background: var(--bg);
+}
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: .02em;
+}
+.form-label .required { color: var(--accent); }
+.form-input, .form-select, .form-textarea {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(27,79,216,.1);
+}
+.form-textarea { resize: vertical; min-height: 72px; }
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.form-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 12px;
+}
+
+/* ── TABLE VIEW ── */
+.table-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.table-toolbar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.search-input-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  flex: 1; max-width: 320px;
+}
+.search-input-wrap input {
+  border: none; background: none; outline: none;
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  color: var(--text); width: 100%;
+}
+.search-input-wrap input::placeholder { color: var(--text3); }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg); }
+th {
+  font-size: 11px; font-weight: 600;
+  color: var(--text3); text-transform: uppercase; letter-spacing: .06em;
+  padding: 10px 16px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; color: var(--text);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #FAFAF8; }
+.td-title { font-weight: 500; max-width: 200px; }
+.td-muted { color: var(--text2); }
+
+/* ── DETAIL PANEL (slide-in) ── */
+.detail-overlay {
+  position: fixed; inset: 0;
+  z-index: 400;
+  pointer-events: none;
+}
+.detail-overlay.open { pointer-events: all; }
+.detail-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15,15,13,.3);
+  opacity: 0; transition: opacity .2s;
+}
+.detail-overlay.open .detail-backdrop { opacity: 1; }
+.detail-panel {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 420px;
+  background: var(--white);
+  box-shadow: -8px 0 32px rgba(0,0,0,.12);
+  transform: translateX(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.detail-overlay.open .detail-panel { transform: translateX(0); }
+.detail-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.detail-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700;
+  line-height: 1.3;
+}
+.detail-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
+.detail-section { margin-bottom: 20px; }
+.detail-section-label {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 10px;
+}
+.detail-row {
+  display: flex; gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--text2); min-width: 120px; flex-shrink: 0; }
+.detail-val { color: var(--text); font-weight: 400; }
+.detail-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; gap: 8px;
+}
+
+/* ── CHECKLIST FULL ── */
+.checklist-full { display: flex; flex-direction: column; gap: 6px; }
+.check-full-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s;
+  user-select: none;
+}
+.check-full-row:hover { background: var(--border); }
+.check-full-box {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.check-full-box.checked { background: var(--accent); border-color: var(--accent); }
+.check-full-box.checked::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+.check-full-text { font-size: 13px; color: var(--text); }
+.check-full-text.checked { text-decoration: line-through; color: var(--text3); }
+
+/* ── MONTH HEADER ── */
+.month-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 24px; margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border2);
+}
+.month-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+}
+.month-count {
+  font-size: 11px; color: var(--text2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 8px; border-radius: 8px;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 14px; }
+.empty-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 8px;
+}
+.empty-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: var(--white);
+  font-size: 13px; font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 900;
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 20px; align-items: center;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+}
+.filter-group-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+.filter-divider {
+  width: 1px; height: 20px;
+  background: var(--border2);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+.filter-chip {
+  font-size: 11.5px; font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text2);
+  cursor: pointer; transition: all .12s;
+  white-space: nowrap;
+}
+.filter-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.filter-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+/* ── TOGGLE PILL (marcadores especiais) ── */
+.toggle-pill {
+  display:flex; align-items:center; gap:6px;
+  cursor:pointer; font-size:13px; color:var(--text2);
+  padding:6px 14px; border:1.5px solid var(--border2);
+  border-radius:20px; transition:all .15s; user-select:none;
+}
+.toggle-pill input[type="checkbox"] { display:none; }
+.toggle-aguardando:has(input:checked)    { border-color:#D97706;            background:#FEF3C7;            color:#92400E;             font-weight:500; }
+.toggle-ainiciar:has(input:checked)      { border-color:var(--blue-mid);    background:var(--blue-bg);    color:var(--blue-mid);     font-weight:500; }
+.toggle-planejado:has(input:checked)     { border-color:#7C3AED;            background:#EDE9FE;            color:#5B21B6;             font-weight:500; }
+.toggle-concluido:has(input:checked)     { border-color:var(--green-mid);   background:var(--green-bg);   color:var(--green);        font-weight:500; }
+/* Prioridade checkboxes */
+.toggle-prio-baixa:has(input:checked)    { border-color:var(--text3);       background:var(--bg);          color:var(--text2);        font-weight:500; }
+.toggle-prio-media:has(input:checked)    { border-color:var(--accent);      background:var(--accent-light);color:var(--accent);       font-weight:500; }
+.toggle-prio-alta:has(input:checked)     { border-color:var(--red-mid);     background:var(--red-bg);      color:var(--red);          font-weight:500; }
+.toggle-prio-importante:has(input:checked){ border-color:#D97706;           background:#FEF3C7;            color:#92400E;             font-weight:500; }
+.toggle-prio-urgente:has(input:checked)   { border-color:var(--red-mid);    background:var(--red-bg);      color:var(--red);           font-weight:500; }
+
+/* ── VIEW FOCO ── */
+.foco-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; gap: 12px;
+}
+.foco-counter {
+  font-size: 12px; color: var(--text3);
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  letter-spacing: .04em;
+}
+.foco-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  max-width: 720px;
+  margin: 0 auto;
+  animation: focusFadeIn .2s ease;
+}
+@keyframes focusFadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.foco-header {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--white) 60%);
+}
+.foco-titulo {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--text); line-height: 1.3;
+  margin-bottom: 10px;
+}
+.foco-body { padding: 22px 28px; }
+.foco-section { margin-bottom: 22px; }
+.foco-section-label {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 10px;
+}
+.foco-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+.foco-field { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.foco-field-label { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
+.foco-field-val { font-size: 13.5px; color: var(--text); font-weight: 400; }
+.foco-footer {
+  padding: 14px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.foco-arrow {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  transition: all .15s; flex-shrink: 0;
+}
+.foco-arrow:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.foco-arrow:disabled { opacity: .3; cursor: default; pointer-events: none; }
+.foco-progress-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 300px; }
+.foco-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border2); cursor: pointer;
+  transition: all .15s;
+}
+.foco-dot.active { background: var(--accent); transform: scale(1.3); }
+.foco-dot.done   { background: var(--green-mid); }
+.foco-filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .main { padding: 16px; }
+  .detail-panel { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <span class="brand-chip">SENAI</span>
+    <span class="brand-name">Gerenciador de Cursos</span>
+  </div>
+  <div class="header-actions" style="gap:10px;">
+    <div id="header-context" style="font-size:12px;color:var(--text2);display:none;align-items:center;gap:6px;background:var(--bg);padding:4px 12px;border-radius:20px;border:1px solid var(--border2);">
+      <span id="header-context-text"></span>
+      <span onclick="limparFiltro()" style="cursor:pointer;color:var(--text3);font-size:11px;">✕</span>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModal()">+ Novo Curso</button>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Visão</div>
+    <button class="nav-item active" onclick="navTo('kanban', this, 'todos')">
+      <span class="nav-icon">📋</span> Por mês
+      <span class="nav-badge" id="badge-kanban">0</span>
+    </button>
+    <button class="nav-item" onclick="navTo('lista', this)">
+      <span class="nav-icon">📄</span> Lista
+    </button>
+    <button class="nav-item" onclick="navTo('foco', this)">
+      <span class="nav-icon">🎯</span> Revisão de tarefas
+    </button>
+
+    <div class="sidebar-label">Status</div>
+    <button class="nav-item" onclick="navTo('kanban', this, 'a-iniciar')">
+      <span class="nav-icon">⚪</span> A iniciar
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'em-andamento')">
+      <span class="nav-icon">🟡</span> Em andamento
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'concluido')">
+      <span class="nav-icon">🟢</span> Concluídos
+    </button>
+    <button class="nav-item active" onclick="navTo('kanban', this, 'todos')">
+      <span class="nav-icon">🔵</span> Todos
+    </button>
+    <div class="sidebar-label">Bucket</div>
+    <button class="nav-item" onclick="navTo('kanban', this, 'aguardando')">
+      <span class="nav-icon">🟠</span> Aguard. terceiros
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'planejado')">
+      <span class="nav-icon">📅</span> Planejado da semana
+    </button>
+    <div class="sidebar-label">Prioridade</div>
+    <button class="nav-item" onclick="navTo('kanban', this, 'prio-baixa')">
+      <span class="nav-icon">🔘</span> Baixa
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'prio-media')">
+      <span class="nav-icon">🔵</span> Média
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'prio-alta')">
+      <span class="nav-icon">🔴</span> Alta
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'prio-importante')">
+      <span class="nav-icon">⭐</span> Importante
+    </button>
+    <button class="nav-item" onclick="navTo('kanban', this, 'prio-urgente')">
+      <span class="nav-icon">🚨</span> Urgente
+    </button>
+
+    <div class="sidebar-label">Dados</div>
+    <button class="nav-item" onclick="exportarDados()">
+      <span class="nav-icon">⬇</span> Exportar XML
+    </button>
+    <button class="nav-item" onclick="importarDados()">
+      <span class="nav-icon">⬆</span> Importar XML
+    </button>
+    <button class="nav-item" onclick="baixarModeloXML()">
+      <span class="nav-icon">📄</span> Modelo XML
+    </button>
+    <button class="nav-item" onclick="limparTudo()" style="color:var(--red-mid);">
+      <span class="nav-icon">🗑</span> Limpar tudo
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- VIEW: KANBAN -->
+    <div class="view active" id="view-kanban">
+      <div class="page-top">
+        <div>
+          <div class="page-title">Cursos por Mês</div>
+          <div class="page-sub">Organize e acompanhe todas as turmas</div>
+        </div>
+      </div>
+      <div class="filter-bar" id="filter-bar-kanban">
+        <span class="filter-group-label">Status</span>
+        <span class="filter-chip" onclick="filtrarKanban('a-iniciar', this)">⚪ A iniciar</span>
+        <span class="filter-chip" onclick="filtrarKanban('em-andamento', this)">🟡 Em andamento</span>
+        <span class="filter-chip" onclick="filtrarKanban('concluido', this)">🟢 Concluídos</span>
+        <span class="filter-chip active" onclick="filtrarKanban('todos', this)">🔵 Todos</span>
+        <span class="filter-divider"></span>
+        <span class="filter-group-label">Bucket</span>
+        <span class="filter-chip" onclick="filtrarKanban('aguardando', this)">🟠 Aguardando</span>
+        <span class="filter-chip" onclick="filtrarKanban('planejado', this)">📅 Planejado</span>
+        <span class="filter-divider"></span>
+        <span class="filter-group-label">Prioridade</span>
+        <span class="filter-chip" onclick="filtrarKanban('prio-baixa', this)">🔘 Baixa</span>
+        <span class="filter-chip" onclick="filtrarKanban('prio-media', this)">Média</span>
+        <span class="filter-chip" onclick="filtrarKanban('prio-alta', this)">🔴 Alta</span>
+        <span class="filter-chip" onclick="filtrarKanban('prio-importante', this)">⭐ Importante</span>
+        <span class="filter-chip" onclick="filtrarKanban('prio-urgente', this)">🚨 Urgente</span>
+      </div>
+      <div class="kanban" id="kanban-board"></div>
+    </div>
+
+    <!-- VIEW: LISTA -->
+    <div class="view" id="view-lista">
+      <div class="page-top">
+        <div>
+          <div class="page-title">Lista de Cursos</div>
+          <div class="page-sub">Todos os cursos cadastrados</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="search-input-wrap">
+            <span>🔍</span>
+            <input type="text" placeholder="Buscar curso, empresa, professor..." id="search-input" oninput="renderLista()">
+          </div>
+          <span id="lista-count" style="font-size:12px;color:var(--text3);margin-left:auto;"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Empresa</th>
+                <th>Início</th>
+                <th>Término</th>
+                <th>Modalidade</th>
+                <th>Professor</th>
+                <th>Status</th>
+                <th>Progresso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="lista-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: FOCO -->
+    <div class="view" id="view-foco">
+      <div class="page-top">
+        <div>
+          <div class="page-title">Revisão de Tarefas</div>
+          <div class="page-sub">Visualize e gerencie cada curso individualmente</div>
+        </div>
+      </div>
+      <div class="foco-filter-bar" id="foco-filtros">
+        <span style="font-size:12px;color:var(--text3);font-weight:500;">Filtrar:</span>
+        <span class="filter-chip active" onclick="setFocoFiltro('todos',this)">Todos</span>
+        <span class="filter-chip" onclick="setFocoFiltro('a-iniciar',this)">⚪ A iniciar</span>
+        <span class="filter-chip" onclick="setFocoFiltro('em-andamento',this)">🟡 Em andamento</span>
+        <span class="filter-chip" onclick="setFocoFiltro('concluido',this)">🟢 Concluídos</span>
+        <span class="filter-chip" onclick="setFocoFiltro('aguardando',this)">🟠 Aguardando</span>
+        <span class="filter-chip" onclick="setFocoFiltro('prio-urgente',this)">🚨 Urgente</span>
+      </div>
+      <div class="foco-nav">
+        <button class="foco-arrow" id="foco-prev" onclick="focoNav(-1)">←</button>
+        <div class="foco-progress-dots" id="foco-dots"></div>
+        <button class="foco-arrow" id="foco-next" onclick="focoNav(1)">→</button>
+      </div>
+      <div id="foco-card-wrap"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL NOVO/EDITAR CURSO -->
+<div class="modal-overlay" id="modal-overlay" onclick="fecharModalFora(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Novo Curso</div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">Identificação</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Nome do Curso <span class="required">*</span></label>
+            <input class="form-input" id="f-nome" placeholder="Ex: Técnico em Eletroeletrônica — Turma A" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Empresa / Parceiro</label>
+            <input class="form-input" id="f-empresa" placeholder="Ex: Empresa ABC">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Parceiro / Canal</label>
+            <input class="form-input" id="f-parceiro" placeholder="Ex: SENAI SP">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Datas e Carga Horária</div>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label class="form-label">Data de Início <span class="required">*</span></label>
+            <input class="form-input" type="date" id="f-inicio" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de Término</label>
+            <input class="form-input" type="date" id="f-termino">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Carga Horária (h)</label>
+            <input class="form-input" type="number" id="f-ch" placeholder="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dias da semana</label>
+            <input class="form-input" id="f-dias" placeholder="Seg / Qua / Sex">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horário</label>
+            <input class="form-input" id="f-horario" placeholder="18h – 22h">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vagas</label>
+            <input class="form-input" type="number" id="f-vagas" placeholder="20">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Modalidade e Estrutura</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Modalidade</label>
+            <select class="form-select" id="f-modalidade">
+              <option value="">Selecione...</option>
+              <option>Presencial</option>
+              <option>EAD</option>
+              <option>Híbrido</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ambiente / Sala</label>
+            <input class="form-input" id="f-ambiente" placeholder="Ex: Lab. Elétrica 2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Professor</label>
+            <input class="form-input" id="f-professor" placeholder="Nome do instrutor">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Oferta SIGE</label>
+            <input class="form-input" id="f-sige" placeholder="Código da oferta">
+          </div>
+          <div class="form-group full" style="margin-top:4px;">
+            <label class="form-label">Prioridade <span style="font-size:11px;color:var(--text3);font-weight:400;">(pode marcar mais de um)</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="f-prioridade-group">
+              <label class="toggle-pill toggle-prio-baixa" id="prio-baixa">
+                <input type="checkbox" name="prioridade" value="Baixa"> Baixa
+              </label>
+              <label class="toggle-pill toggle-prio-media" id="prio-media">
+                <input type="checkbox" name="prioridade" value="Média"> Média
+              </label>
+              <label class="toggle-pill toggle-prio-alta" id="prio-alta">
+                <input type="checkbox" name="prioridade" value="Alta"> Alta
+              </label>
+              <label class="toggle-pill toggle-prio-importante" id="prio-importante">
+                <input type="checkbox" name="prioridade" value="Importante"> ⭐ Importante
+              </label>
+              <label class="toggle-pill toggle-prio-urgente" id="prio-urgente">
+                <input type="checkbox" name="prioridade" value="Urgente"> 🚨 Urgente
+              </label>
+            </div>
+          </div>
+          <div class="form-group full" style="margin-top:4px;">
+            <label class="form-label">Bucket <span style="font-size:11px;color:var(--text3);font-weight:400;">(pode marcar mais de um)</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="f-marcadores-group">
+              <label class="toggle-pill toggle-aguardando" id="mark-aguardando">
+                <input type="checkbox" name="marcador" value="aguardando"> 🟠 Aguardando terceiros
+              </label>
+              <label class="toggle-pill toggle-ainiciar" id="mark-ainiciar">
+                <input type="checkbox" name="marcador" value="a-iniciar-bucket"> ⚪ A iniciar
+              </label>
+              <label class="toggle-pill toggle-planejado" id="mark-planejado">
+                <input type="checkbox" name="marcador" value="planejado"> 📅 Planejado da semana
+              </label>
+              <label class="toggle-pill toggle-concluido" id="mark-concluido">
+                <input type="checkbox" name="marcador" value="concluido-bucket"> ✅ Concluídos
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Controle administrativo</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Evento</label>
+            <input class="form-input" id="f-evento" placeholder="Código do evento">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pasta</label>
+            <input class="form-input" id="f-pasta" placeholder="Pasta física ou digital">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Participantes (inscritos)</label>
+            <input class="form-input" type="number" id="f-participantes" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Observações</div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="f-obs" placeholder="Informações adicionais, requisitos especiais, etc."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCurso()">Salvar curso</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay">
+  <div class="detail-backdrop" onclick="fecharDetalhe()"></div>
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div>
+        <div class="detail-title" id="dp-title"></div>
+        <div id="dp-tags" style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;"></div>
+      </div>
+      <button class="modal-close" onclick="fecharDetalhe()">✕</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-label">Etapas administrativas</div>
+        <div class="checklist-full" id="dp-checklist"></div>
+        <div style="margin-top:10px;">
+          <div class="progress-label" id="dp-prog-label"></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="dp-prog-bar"></div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-label">Datas e horários</div>
+        <div id="dp-datas"></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-label">Informações do curso</div>
+        <div id="dp-info"></div>
+      </div>
+      <div class="detail-section" id="dp-obs-section" style="display:none">
+        <div class="detail-section-label">Observações</div>
+        <p id="dp-obs" style="font-size:13px;color:var(--text2);line-height:1.6;"></p>
+      </div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editarCursoAtual()">✏️ Editar</button>
+      <button class="btn btn-danger btn-sm" onclick="excluirCursoAtual()">🗑 Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAÇÃO XML -->
+<div class="modal-overlay" id="import-modal" onclick="if(event.target===this)fecharImportModal()">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">Importar XML</div>
+      <button class="modal-close" onclick="fecharImportModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div style="background:var(--blue-bg);border:1px solid #BFDBFE;border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1e40af;line-height:1.6;">
+        <strong>Formatos aceitos:</strong><br>
+        • XML exportado deste sistema<br>
+        • Excel salvo como XML (Pasta de Trabalho XML)<br>
+        • XML com colunas de planilha (NomeDaTarefa, Início, Professor…)
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">O que fazer com os cursos já cadastrados?</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;transition:border-color .15s;" id="opt-adicionar" onclick="selecionarOpcao('adicionar')">
+            <div style="width:18px;height:18px;border:2px solid var(--accent);border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;" id="radio-adicionar">
+              <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div>
+            </div>
+            <div>
+              <div style="font-weight:500;font-size:13.5px;color:var(--text);">Adicionar ao que já existe</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;">Cursos novos são adicionados. Cursos duplicados (mesmo Evento ou Nome+Data) são ignorados.</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color .15s;" id="opt-substituir" onclick="selecionarOpcao('substituir')">
+            <div style="width:18px;height:18px;border:2px solid var(--border2);border-radius:50%;flex-shrink:0;margin-top:1px;" id="radio-substituir"></div>
+            <div>
+              <div style="font-weight:500;font-size:13.5px;color:var(--text);">Substituir tudo</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px;">Apaga todos os cursos atuais e carrega apenas os do arquivo XML.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Não tem um arquivo XML ainda?</div>
+        <button class="btn btn-ghost btn-sm" onclick="baixarModeloXML();fecharImportModal()">
+          📄 Baixar modelo XML preenchido
+        </button>
+        <div style="font-size:11.5px;color:var(--text3);margin-top:6px;">Abra no Bloco de Notas ou no Excel e preencha com seus cursos.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharImportModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirmar-import" onclick="executarImportacao(modoImport)">
+        Escolher arquivo XML →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let modoImport = 'adicionar';
+function selecionarOpcao(modo) {
+  modoImport = modo;
+  ['adicionar','substituir'].forEach(m => {
+    const opt = document.getElementById('opt-'+m);
+    const radio = document.getElementById('radio-'+m);
+    if (m === modo) {
+      opt.style.borderColor = 'var(--accent)';
+      radio.style.border = '2px solid var(--accent)';
+      radio.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div>';
+    } else {
+      opt.style.borderColor = 'var(--border)';
+      radio.style.border = '2px solid var(--border2)';
+      radio.innerHTML = '';
+    }
+  });
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════════
+// DADOS
+// ═══════════════════════════════════════════
+let cursos = JSON.parse(localStorage.getItem('senai_cursos') || '[]');
+let cursoEditandoId = null;
+let cursoDetalheId = null;
+let filtroAtual = 'todos';
+
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+               'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const CHECKLIST_ITEMS = [
+  { key: 'matricula',   label: 'Matrícula realizada' },
+  { key: 'publicacao',  label: 'Publicação no site' },
+  { key: 'avaliacao',   label: 'Avaliação de reação aplicada' },
+  { key: 'certificado', label: 'Certificado emitido' },
+];
+
+function salvar() {
+  localStorage.setItem('senai_cursos', JSON.stringify(cursos));
+}
+
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+// ═══════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════
+function navTo(view, el, filtro) {
+  // Ativar item da sidebar
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Trocar view visível
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view)?.classList.add('active');
+
+  // Se veio com filtro, aplica no kanban também
+  if (filtro !== undefined) {
+    filtroAtual  = filtro;
+    filtroKanban = filtro;
+    // Sincronizar chips do kanban
+    document.querySelectorAll('#filter-bar-kanban .filter-chip').forEach(c => {
+      c.classList.toggle('active', c.getAttribute('onclick')?.includes("'" + filtro + "'"));
+    });
+    // Ajustar flex-wrap do board
+    const board = document.getElementById('kanban-board');
+    if (board) board.style.flexWrap = filtro === 'aguardando' ? 'wrap' : 'nowrap';
+  }
+  // Se for a view foco, renderizar imediatamente
+  if (view === 'foco') { setTimeout(renderFoco, 0); }
+  render();
+}
+
+// ═══════════════════════════════════════════
+// STATUS DO CURSO
+// ═══════════════════════════════════════════
+function getStatus(c) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const ini = c.inicio ? new Date(c.inicio) : null;
+  const fim = c.termino ? new Date(c.termino) : null;
+  if (ini && fim) {
+    if (hoje > fim) return 'concluido';
+    if (hoje >= ini) return 'em-andamento';
+    return 'a-iniciar';
+  }
+  // Marcadores de bucket sobrepõem status calculado
+  const marc = c.marcadores || [];
+  if (marc.includes('aguardando'))      return 'aguardando';
+  if (marc.includes('concluido-bucket'))return 'concluido';
+  if (marc.includes('planejado'))       return 'a-iniciar';
+  if (marc.includes('a-iniciar-bucket'))return 'a-iniciar';
+  const b = (c.bucket_original || '').toLowerCase();
+  if (b.includes('conclu')) return 'concluido';
+  if (b.includes('andamento')) return 'em-andamento';
+  if (b.includes('aguardando')) return 'aguardando';
+  if (b.includes('planejado')) return 'a-iniciar';
+  if (b.includes('n\u00e3o iniciado')) return 'a-iniciar';
+  if (ini) return 'a-iniciar';
+  return 'sem-data';
+}
+
+function getStatusTag(status) {
+  const map = {
+    'concluido':     { label: 'Concluído',        cls: 'tag-green' },
+    'em-andamento':  { label: 'Em andamento',     cls: 'tag-amber' },
+    'a-iniciar':     { label: 'A iniciar',         cls: 'tag-blue' },
+    'aguardando':    { label: '🟠 Aguard. terceiros', cls: 'tag-amber' },
+    'sem-data':      { label: 'Sem data',          cls: 'tag-gray' },
+  };
+  return map[status] || map['sem-data'];
+}
+
+function getProgresso(c) {
+  const total = CHECKLIST_ITEMS.length;
+  const feitos = CHECKLIST_ITEMS.filter(i => c.checklist?.[i.key]).length;
+  return { feitos, total, pct: Math.round((feitos / total) * 100) };
+}
+
+// ═══════════════════════════════════════════
+// RENDER PRINCIPAL
+// ═══════════════════════════════════════════
+function render() {
+  renderStats();
+  renderKanban();
+  renderLista();
+  // Só rerenderiza foco se a view estiver ativa (evita trabalho desnecessário)
+  if (document.getElementById('view-foco')?.classList.contains('active')) renderFoco();
+  document.getElementById('badge-kanban').textContent = cursos.length;
+}
+
+// Função central que retorna cursos filtrados pelo filtro ativo do kanban
+function getCursosFiltrados() {
+  if (filtroKanban === 'todos') return cursos;
+  return cursos.filter(c => {
+    const status = getStatus(c);
+    const prio   = c.prioridade || [];
+    const marc   = c.marcadores || [];
+    if (filtroKanban === 'a-iniciar')      return status === 'a-iniciar';
+    if (filtroKanban === 'em-andamento')   return status === 'em-andamento';
+    if (filtroKanban === 'concluido')      return status === 'concluido';
+    if (filtroKanban === 'aguardando')     return marc.includes('aguardando') || status === 'aguardando';
+    if (filtroKanban === 'planejado')      return marc.includes('planejado');
+    if (filtroKanban === 'prio-baixa')     return prio.includes('Baixa');
+    if (filtroKanban === 'prio-media')     return prio.includes('Média');
+    if (filtroKanban === 'prio-alta')      return prio.includes('Alta');
+    if (filtroKanban === 'prio-importante')return prio.includes('Importante');
+    if (filtroKanban === 'prio-urgente')   return prio.includes('Urgente');
+    return true;
+  });
+}
+
+const FILTRO_META = {
+  'todos':          { label: 'Todos os cursos',        icon: '🔵', cor: 'var(--accent)'    },
+  'a-iniciar':      { label: 'A iniciar',              icon: '⚪', cor: 'var(--blue-mid)'  },
+  'em-andamento':   { label: 'Em andamento',           icon: '🟡', cor: 'var(--amber-mid)' },
+  'concluido':      { label: 'Concluídos',             icon: '🟢', cor: 'var(--green-mid)' },
+  'aguardando':     { label: 'Aguardando terceiros',   icon: '🟠', cor: '#D97706'          },
+  'planejado':      { label: 'Planejado da semana',    icon: '📅', cor: '#7C3AED'          },
+  'prio-baixa':     { label: 'Prioridade: Baixa',      icon: '🔘', cor: 'var(--text2)'     },
+  'prio-media':     { label: 'Prioridade: Média',      icon: '🔵', cor: 'var(--accent)'    },
+  'prio-alta':      { label: 'Prioridade: Alta',       icon: '🔴', cor: 'var(--red-mid)'   },
+  'prio-importante':{ label: 'Prioridade: Importante', icon: '⭐', cor: '#D97706'          },
+  'prio-urgente':   { label: 'Prioridade: Urgente',    icon: '🚨', cor: 'var(--red-mid)'   },
+};
+
+function renderStats() {
+  const isFiltrado = filtroKanban !== 'todos';
+  const meta       = FILTRO_META[filtroKanban] || FILTRO_META['todos'];
+  const lista      = getCursosFiltrados();
+  const total      = cursos.length;       // sempre o total real
+  const visiveis   = lista.length;        // quantidade no filtro
+
+  const ativos     = lista.filter(c => getStatus(c) === 'em-andamento').length;
+  const concluidos = lista.filter(c => getStatus(c) === 'concluido').length;
+  const semCert    = lista.filter(c => !c.checklist?.certificado).length;
+
+  const pctAndamento  = visiveis ? Math.round((ativos     / visiveis) * 100) : 0;
+  const pctConcluidos = visiveis ? Math.round((concluidos / visiveis) * 100) : 0;
+  const pctCert       = visiveis ? Math.round(((visiveis - semCert) / visiveis) * 100) : 0;
+  const pctDoTotal    = total    ? Math.round((visiveis   / total)   * 100) : 0;
+
+  // Chip de contexto que aparece quando há filtro ativo
+  const contextoChip = isFiltrado
+    ? `<div id="stats-context-chip" style="
+        display:inline-flex;align-items:center;gap:6px;
+        background:var(--accent-light);border:1px solid rgba(27,79,216,.2);
+        color:var(--accent);border-radius:20px;
+        padding:3px 12px;font-size:11px;font-weight:600;
+        margin-bottom:10px;cursor:pointer;transition:all .15s;"
+        onclick="limparFiltro()" title="Clique para ver todos">
+        ${meta.icon} ${meta.label} &nbsp;·&nbsp; ${visiveis} curso${visiveis!==1?'s':''} &nbsp; ✕
+      </div>`
+    : '';
+
+  // Card 1 — muda conforme o filtro
+  const card1 = isFiltrado ? `
+    <div class="stat-card stat-card-total" style="border-top:3px solid ${meta.cor};">
+      <div class="stat-watermark" style="color:${meta.cor};">${visiveis}</div>
+      <div class="stat-label">${meta.icon} ${meta.label}</div>
+      <div class="stat-value" style="position:relative;z-index:1;color:${meta.cor};">${visiveis}</div>
+      <div class="stat-sub" style="position:relative;z-index:1;">${pctDoTotal}% dos ${total} cursos</div>
+      <div style="margin-top:10px;position:relative;z-index:1;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;">
+          <span>Concluídos neste grupo</span><span>${pctConcluidos}%</span>
+        </div>
+        <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${pctConcluidos}%;background:${meta.cor};border-radius:2px;transition:width .4s;"></div>
+        </div>
+      </div>
+    </div>` : `
+    <div class="stat-card stat-card-total">
+      <div class="stat-watermark">${total}</div>
+      <div class="stat-label">Total de cursos</div>
+      <div class="stat-value" style="position:relative;z-index:1;">${total}</div>
+      <div class="stat-sub" style="position:relative;z-index:1;">cadastrados</div>
+      <div style="margin-top:10px;position:relative;z-index:1;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;">
+          <span>Concluídos</span><span>${pctConcluidos}%</span>
+        </div>
+        <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${pctConcluidos}%;background:var(--green-mid);border-radius:2px;transition:width .4s;"></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Sparkline — distribuição por mês dos cursos filtrados
+  function sparklineBars(lista, cor) {
+    const porMes = {};
+    lista.forEach(c => {
+      if (!c.inicio) return;
+      const m = c.inicio.slice(0,7);
+      porMes[m] = (porMes[m]||0)+1;
+    });
+    const vals = Object.values(porMes).slice(-6);
+    if (!vals.length) return '';
+    const mx = Math.max(...vals);
+    return vals.map(v => {
+      const h = mx ? Math.round((v/mx)*24)+4 : 4;
+      return `<div class="spark-bar" style="height:${h}px;background:${cor};opacity:.7;"></div>`;
+    }).join('');
+  }
+
+  // Mini donut SVG
+  function miniDonut(pct, cor) {
+    const r=16, c=20, circ=2*Math.PI*r;
+    const dash = (pct/100)*circ;
+    return `<svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--border)" stroke-width="4"/>
+      <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${cor}" stroke-width="4"
+        stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}"
+        stroke-linecap="round" style="transition:stroke-dasharray .4s ease;"/>
+      <text x="${c}" y="${c+4}" text-anchor="middle" font-size="9" font-weight="700"
+        fill="${cor}" font-family="Syne,sans-serif">${pct}%</text>
+    </svg>`;
+  }
+
+  // Atualizar indicador no header
+  const ctxEl = document.getElementById('header-context');
+  const ctxTxt = document.getElementById('header-context-text');
+  if (ctxEl && ctxTxt) {
+    if (isFiltrado) {
+      ctxTxt.textContent = meta.icon + ' ' + meta.label + ' · ' + visiveis + ' curso' + (visiveis!==1?'s':'');
+      ctxEl.style.display = 'flex';
+    } else {
+      ctxEl.style.display = 'none';
+    }
+  }
+
+  document.getElementById('stats-row').innerHTML = `
+    ${contextoChip ? `<div style="grid-column:1/-1;margin-bottom:-4px;">${contextoChip}</div>` : ''}
+    ${card1}
+    <div class="stat-card-sm">
+      <div class="stat-label">Em andamento</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div class="stat-value-sm" style="color:var(--amber-mid);">${ativos}</div>
+        <div class="stat-donut-wrap">${miniDonut(pctAndamento,'var(--amber-mid)')}</div>
+      </div>
+      <div class="stat-sub">${pctAndamento}% ${isFiltrado?'deste grupo':'do total'}</div>
+      <div class="sparkline">${sparklineBars(lista.filter(c=>getStatus(c)==='em-andamento'),'var(--amber-mid)')}</div>
+    </div>
+    <div class="stat-card-sm">
+      <div class="stat-label">Concluídos</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div class="stat-value-sm" style="color:var(--green-mid);">${concluidos}</div>
+        <div class="stat-donut-wrap">${miniDonut(pctConcluidos,'var(--green-mid)')}</div>
+      </div>
+      <div class="stat-sub">${pctConcluidos}% ${isFiltrado?'deste grupo':'do total'}</div>
+      <div class="sparkline">${sparklineBars(lista.filter(c=>getStatus(c)==='concluido'),'var(--green-mid)')}</div>
+    </div>
+    <div class="stat-card-sm">
+      <div class="stat-label">Certificados</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div class="stat-value-sm" style="color:var(--accent);">${visiveis-semCert}</div>
+        <div class="stat-donut-wrap">${miniDonut(pctCert,'var(--accent)')}</div>
+      </div>
+      <div class="stat-sub">${pctCert}% com certificado</div>
+      <div class="sparkline">${sparklineBars(lista.filter(c=>c.checklist?.certificado),'var(--accent)')}</div>
+    </div>
+  `;
+}
+
+function limparFiltro() {
+  filtroKanban = 'todos';
+  filtroAtual  = 'todos';
+  // Atualizar chips e sidebar
+  document.querySelectorAll('#filter-bar-kanban .filter-chip').forEach(c => {
+    c.classList.toggle('active', c.getAttribute('onclick')?.includes("'todos'"));
+  });
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const onclick = n.getAttribute('onclick') || '';
+    n.classList.toggle('active', onclick.includes("'todos'") && onclick.includes('kanban'));
+  });
+  render();
+}
+
+// ═══════════════════════════════════════════
+// KANBAN
+// ═══════════════════════════════════════════
+let filtroKanban = 'todos';
+function filtrarKanban(f, el) {
+  filtroKanban = f;
+  filtroAtual  = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  // Resetar flex-wrap do board
+  const board = document.getElementById('kanban-board');
+  if (board) {
+    board.style.flexWrap = (f === 'aguardando' || f === 'planejado') ? 'wrap' : 'nowrap';
+  }
+  // Sincronizar sidebar
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const oc = n.getAttribute('onclick') || '';
+    n.classList.toggle('active', oc.includes("'" + f + "'") && oc.includes('kanban'));
+  });
+  renderStats();
+  renderKanban();
+}
+
+// Configuração dos subgrupos de status para o modo Aguardando
+const SUBGRUPOS_AGUARDANDO = [
+  { key: 'a-iniciar',    label: '⚪ A iniciar',     cor: 'var(--blue-mid)' },
+  { key: 'em-andamento', label: '🟡 Em andamento',  cor: 'var(--amber-mid)' },
+  { key: 'concluido',    label: '🟢 Concluído',      cor: 'var(--green-mid)' },
+  { key: 'sem-data',     label: '— Sem data',        cor: 'var(--text3)' },
+];
+
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  if (!board) return;
+
+  // ── MODO ESPECIAL: Aguardando terceiros com subgrupos de status ──
+  if (filtroKanban === 'aguardando') {
+    renderKanbanAguardando(board);
+    return;
+  }
+
+  // Organizar por mês
+  const porMes = {};
+  cursos.forEach(c => {
+    const status = getStatus(c);
+    if (filtroKanban !== 'todos') {
+      // Filtros de prioridade
+      if (filtroKanban === 'prio-baixa'      && !(c.prioridade||[]).includes('Baixa'))      return;
+      if (filtroKanban === 'prio-media'      && !(c.prioridade||[]).includes('Média'))      return;
+      if (filtroKanban === 'prio-alta'       && !(c.prioridade||[]).includes('Alta'))       return;
+      if (filtroKanban === 'prio-importante' && !(c.prioridade||[]).includes('Importante')) return;
+      if (filtroKanban === 'prio-urgente'    && !(c.prioridade||[]).includes('Urgente'))    return;
+      // Filtros de bucket
+      if (filtroKanban === 'planejado'  && !(c.marcadores||[]).includes('planejado'))   return;
+      if (['a-iniciar','em-andamento','concluido'].includes(filtroKanban) && status !== filtroKanban) return;
+    }
+    let mesKey = 'sem-data';
+    let mesLabel = 'Sem data definida';
+    if (c.inicio) {
+      const d = new Date(c.inicio);
+      mesKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      mesLabel = `${MESES[d.getMonth()]} ${d.getFullYear()}`;
+    }
+    if (!porMes[mesKey]) porMes[mesKey] = { label: mesLabel, cursos: [], ordem: mesKey };
+    porMes[mesKey].cursos.push(c);
+  });
+
+  const keys = Object.keys(porMes).sort();
+
+  if (keys.length === 0) {
+    board.innerHTML = `
+      <div style="width:100%;display:flex;align-items:center;justify-content:center;padding:60px 0;">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">Nenhum curso cadastrado</div>
+          <div class="empty-sub">Clique em "+ Novo Curso" para começar</div>
+          <button class="btn btn-primary" onclick="abrirModal()">+ Novo Curso</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  board.innerHTML = keys.map(k => {
+    const mes = porMes[k];
+    const cards = mes.cursos.map(c => buildCard(c)).join('');
+    const concl = mes.cursos.filter(c => getStatus(c) === 'concluido').length;
+    const pctCol = mes.cursos.length ? Math.round((concl/mes.cursos.length)*100) : 0;
+    return `
+      <div class="kanban-col">
+        <div class="kanban-header">
+          <div class="kanban-title">📅 ${mes.label}</div>
+          <div class="kanban-count">${mes.cursos.length}</div>
+        </div>
+        ${pctCol > 0 ? `<div style="height:2px;background:var(--border);"><div style="height:100%;width:${pctCol}%;background:var(--green-mid);transition:width .4s;"></div></div>` : '<div style="height:2px;background:var(--border);"></div>'}
+        <div class="kanban-body">
+          ${cards || '<div class="kanban-empty">Nenhum curso</div>'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderKanbanAguardando(board) {
+  // Todos os cursos marcados como Aguardando (prioridade ou bucket_original)
+  const aguardando = cursos.filter(c => {
+    const marc = c.marcadores || [];
+    const bkt  = (c.bucket_original || '').toLowerCase();
+    return marc.includes('aguardando') || bkt.includes('aguardando');
+  });
+
+  if (aguardando.length === 0) {
+    board.innerHTML = `
+      <div style="width:100%;display:flex;align-items:center;justify-content:center;padding:60px 0;">
+        <div class="empty-state">
+          <div class="empty-icon">🟠</div>
+          <div class="empty-title">Nenhum curso aguardando terceiros</div>
+          <div class="empty-sub">Marque um curso como "Aguardando terceiros" ao editar para ele aparecer aqui</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Agrupar pelo status INTERNO do processo (onde está parado)
+  // Para isso usamos o STATUS calculado SEM considerar a prioridade Aguardando,
+  // para mostrar em qual fase o processo está travado
+  function getStatusReal(c) {
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const ini = c.inicio ? new Date(c.inicio) : null;
+    const fim = c.termino ? new Date(c.termino) : null;
+    if (ini && fim) {
+      if (hoje > fim) return 'concluido';
+      if (hoje >= ini) return 'em-andamento';
+      return 'a-iniciar';
+    }
+    // sem datas: usa checklist para inferir
+    const prog = getProgresso(c);
+    if (prog.pct === 100) return 'concluido';
+    if (prog.pct > 0) return 'em-andamento';
+    return 'a-iniciar';
+  }
+
+  // Montar subgrupos
+  const subgrupos = {};
+  aguardando.forEach(c => {
+    const sk = getStatusReal(c);
+    if (!subgrupos[sk]) subgrupos[sk] = [];
+    subgrupos[sk].push(c);
+  });
+
+  // Renderizar: uma coluna por subgrupo, na ordem definida
+  const colunas = SUBGRUPOS_AGUARDANDO
+    .filter(sg => subgrupos[sg.key]?.length > 0)
+    .map(sg => {
+      const lista = subgrupos[sg.key];
+      const cards = lista.map(c => buildCard(c)).join('');
+      return `
+        <div class="kanban-col" style="border-top: 3px solid ${sg.cor};">
+          <div class="kanban-header" style="background:var(--white);">
+            <div>
+              <div class="kanban-title">${sg.label}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px;">Aguardando terceiros nesta fase</div>
+            </div>
+            <div class="kanban-count">${lista.length}</div>
+          </div>
+          <div class="kanban-body">${cards}</div>
+        </div>`;
+    }).join('');
+
+  // Banner de cabeçalho explicativo
+  const totalAguardando = aguardando.length;
+  board.innerHTML = `
+    <div style="width:100%;margin-bottom:16px;flex-shrink:0;">
+      <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">🟠</span>
+        <div>
+          <div style="font-weight:600;font-size:13px;color:#92400E;">${totalAguardando} curso${totalAguardando!==1?'s':''} aguardando terceiros</div>
+          <div style="font-size:12px;color:#B45309;margin-top:2px;">Agrupados abaixo pelo estágio em que o processo está parado</div>
+        </div>
+      </div>
+    </div>
+    ${colunas || '<div style="color:var(--text3);font-size:13px;padding:20px;">Nenhum subgrupo encontrado.</div>'}`;
+
+  // O banner ocupa largura total — precisa de flex-wrap no board
+  board.style.flexWrap = 'wrap';
+}
+
+function buildCard(c) {
+  const status = getStatus(c);
+  const stag = getStatusTag(status);
+  const prog = getProgresso(c);
+
+  const ini = c.inicio ? fmtData(c.inicio) : '—';
+  const fim = c.termino ? fmtData(c.termino) : '—';
+
+  const checks = CHECKLIST_ITEMS.map(item => {
+    const done = c.checklist?.[item.key];
+    return `<div class="check-row" onclick="toggleCheck('${c.id}','${item.key}',event)">
+      <div class="check-box-ui ${done ? 'checked' : ''}"></div>
+      <span class="check-text ${done ? 'checked' : ''}">${item.label}</span>
+    </div>`;
+  }).join('');
+
+  // Cor do indicador lateral baseada no status
+  const statusCores = { 'concluido':'var(--green-mid)', 'em-andamento':'var(--amber-mid)', 'aguardando':'#D97706', 'a-iniciar':'var(--blue-mid)', 'sem-data':'var(--text3)' };
+  const lateralCor = statusCores[getStatus(c)] || 'var(--border2)';
+
+  return `
+    <div class="course-card" onclick="abrirDetalhe('${c.id}')" style="--card-cor:${lateralCor};">
+      <style>.course-card[style*="--card-cor"]::before{background:var(--card-cor)!important;}</style>
+      <div class="course-card-title">${esc(c.nome)}</div>
+      <div class="course-card-meta">
+        ${c.empresa ? `<div class="course-card-row">🏢 ${esc(c.empresa)}</div>` : ''}
+        <div class="course-card-row">📅 ${ini}${c.termino ? ' → '+fim : ''}</div>
+      </div>
+      <div class="course-card-tags">
+        <span class="tag ${stag.cls}">${stag.label}</span>
+        ${c.ch ? `<span class="tag tag-gray">${c.ch}h</span>` : ''}
+        ${(c.prioridade||[]).includes('Urgente')    ? `<span class="tag tag-red">🚨</span>` : ''}
+        ${(c.prioridade||[]).includes('Alta')       ? `<span class="tag tag-red">Alta</span>` : ''}
+        ${(c.prioridade||[]).includes('Importante') ? `<span class="tag" style="background:#FEF3C7;color:#92400E;">⭐</span>` : ''}
+        ${(c.marcadores||[]).includes('aguardando') ? `<span class="tag tag-amber">🟠</span>` : ''}
+        ${(c.marcadores||[]).includes('planejado')  ? `<span class="tag" style="background:#EDE9FE;color:#5B21B6;">📅</span>` : ''}
+      </div>
+      <div class="checklist-mini">
+        ${checks}
+        <div class="progress-mini" style="margin-top:6px;padding-left:0;">
+          <div class="progress-label">${prog.feitos}/${prog.total} · ${prog.pct}%</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// LISTA
+// ═══════════════════════════════════════════
+function renderLista() {
+  const tbody = document.getElementById('lista-tbody');
+  if (!tbody) return;
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const filtrados = cursos.filter(c =>
+    !q ||
+    c.nome?.toLowerCase().includes(q) ||
+    c.empresa?.toLowerCase().includes(q) ||
+    c.professor?.toLowerCase().includes(q) ||
+    c.evento?.toLowerCase().includes(q)
+  );
+  document.getElementById('lista-count').textContent = `${filtrados.length} curso${filtrados.length !== 1 ? 's' : ''}`;
+  if (filtrados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text3);">Nenhum curso encontrado</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtrados.map(c => {
+    const status = getStatus(c);
+    const stag = getStatusTag(status);
+    const prog = getProgresso(c);
+    return `
+      <tr onclick="abrirDetalhe('${c.id}')" style="cursor:pointer;">
+        <td class="td-title">${esc(c.nome)}</td>
+        <td class="td-muted">${esc(c.empresa || '—')}</td>
+        <td class="td-muted">${c.inicio ? fmtData(c.inicio) : '—'}</td>
+        <td class="td-muted">${c.termino ? fmtData(c.termino) : '—'}</td>
+        <td><span class="tag tag-gray">${esc(c.modalidade || '—')}</span></td>
+        <td class="td-muted">${esc(c.professor || '—')}</td>
+        <td><span class="tag ${stag.cls}">${stag.label}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="progress-bar-bg" style="width:60px;">
+              <div class="progress-bar-fill" style="width:${prog.pct}%"></div>
+            </div>
+            <span style="font-size:11px;color:var(--text3)">${prog.pct}%</span>
+          </div>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="abrirModalEditar('${c.id}')" title="Editar">✏️</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// MODAL CURSO
+// ═══════════════════════════════════════════
+function abrirModal(id) {
+  cursoEditandoId = id || null;
+  const c = id ? cursos.find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = c ? 'Editar Curso' : 'Novo Curso';
+
+  document.getElementById('f-nome').value = c?.nome || '';
+  document.getElementById('f-empresa').value = c?.empresa || '';
+  document.getElementById('f-parceiro').value = c?.parceiro || '';
+  document.getElementById('f-inicio').value = c?.inicio || '';
+  document.getElementById('f-termino').value = c?.termino || '';
+  document.getElementById('f-ch').value = c?.ch || '';
+  document.getElementById('f-dias').value = c?.dias || '';
+  document.getElementById('f-horario').value = c?.horario || '';
+  document.getElementById('f-vagas').value = c?.vagas || '';
+  document.getElementById('f-modalidade').value = c?.modalidade || '';
+  document.getElementById('f-ambiente').value = c?.ambiente || '';
+  document.getElementById('f-professor').value = c?.professor || '';
+  document.getElementById('f-sige').value = c?.sige || '';
+  // Prioridade (array)
+  const prioArr = Array.isArray(c?.prioridade) ? c.prioridade : (c?.prioridade ? [c.prioridade] : ['Média']);
+  document.querySelectorAll('input[name="prioridade"]').forEach(r => { r.checked = prioArr.includes(r.value); });
+  // Bucket/marcadores
+  const marc = c?.marcadores || marcadoresLegado(c);
+  document.querySelectorAll('input[name="marcador"]').forEach(r => { r.checked = marc.includes(r.value); });
+  document.getElementById('f-evento').value = c?.evento || '';
+  document.getElementById('f-pasta').value = c?.pasta || '';
+  document.getElementById('f-participantes').value = c?.participantes || '';
+  document.getElementById('f-obs').value = c?.obs || '';
+
+  // Se novo curso, sem nada marcado
+  if (!id) {
+    document.querySelectorAll('input[name="prioridade"]').forEach(r => { r.checked = false; });
+    document.querySelectorAll('input[name="marcador"]').forEach(r => { r.checked = false; });
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-nome').focus();
+}
+
+function abrirModalEditar(id) { abrirModal(id); }
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function fecharModalFora(e) {
+  if (e.target === document.getElementById('modal-overlay')) fecharModal();
+}
+
+function salvarCurso() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const inicio = document.getElementById('f-inicio').value;
+  if (!nome) { toast('⚠️ Informe o nome do curso'); document.getElementById('f-nome').focus(); return; }
+  if (!inicio) { toast('⚠️ Informe a data de início'); document.getElementById('f-inicio').focus(); return; }
+
+  const dados = {
+    nome, inicio,
+    empresa:      document.getElementById('f-empresa').value.trim(),
+    parceiro:     document.getElementById('f-parceiro').value.trim(),
+    termino:      document.getElementById('f-termino').value,
+    ch:           document.getElementById('f-ch').value,
+    dias:         document.getElementById('f-dias').value.trim(),
+    horario:      document.getElementById('f-horario').value.trim(),
+    vagas:        document.getElementById('f-vagas').value,
+    modalidade:   document.getElementById('f-modalidade').value,
+    ambiente:     document.getElementById('f-ambiente').value.trim(),
+    professor:    document.getElementById('f-professor').value.trim(),
+    sige:         document.getElementById('f-sige').value.trim(),
+    prioridade:   Array.from(document.querySelectorAll('input[name="prioridade"]:checked')).map(x=>x.value),
+    marcadores:   Array.from(document.querySelectorAll('input[name="marcador"]:checked')).map(x=>x.value),
+    evento:       document.getElementById('f-evento').value.trim(),
+    pasta:        document.getElementById('f-pasta').value.trim(),
+    participantes:document.getElementById('f-participantes').value,
+    obs:          document.getElementById('f-obs').value.trim(),
+  };
+
+  if (cursoEditandoId) {
+    const idx = cursos.findIndex(x => x.id === cursoEditandoId);
+    if (idx >= 0) { cursos[idx] = { ...cursos[idx], ...dados }; }
+    toast('✅ Curso atualizado!');
+  } else {
+    cursos.push({ id: gerarId(), checklist: {}, ...dados });
+    toast('✅ Curso cadastrado!');
+  }
+
+  salvar();
+  fecharModal();
+  render();
+  if (cursoDetalheId) abrirDetalhe(cursoDetalheId);
+}
+
+// ═══════════════════════════════════════════
+// DETALHE
+// ═══════════════════════════════════════════
+function abrirDetalhe(id) {
+  cursoDetalheId = id;
+  const c = cursos.find(x => x.id === id);
+  if (!c) return;
+
+  const status = getStatus(c);
+  const stag = getStatusTag(status);
+  const prog = getProgresso(c);
+
+  document.getElementById('dp-title').textContent = c.nome;
+
+  // Tags
+  let tagsHtml = `<span class="tag ${stag.cls}">${stag.label}</span>`;
+  if (c.modalidade) tagsHtml += `<span class="tag tag-gray">${esc(c.modalidade)}</span>`;
+  if (c.ch) tagsHtml += `<span class="tag tag-gray">${c.ch}h</span>`;
+  const marc = c.marcadores || [];
+  const prioArr = Array.isArray(c.prioridade) ? c.prioridade : [];
+  if (prioArr.includes('Urgente'))    tagsHtml += `<span class="tag tag-red">🚨 Urgente</span>`;
+  if (prioArr.includes('Alta'))       tagsHtml += `<span class="tag" style="background:var(--red-bg);color:var(--red);">Alta</span>`;
+  if (prioArr.includes('Importante')) tagsHtml += `<span class="tag" style="background:#FEF3C7;color:#92400E;">⭐ Importante</span>`;
+  if (prioArr.includes('Baixa'))      tagsHtml += `<span class="tag tag-gray">Baixa</span>`;
+  if (marc.includes('aguardando'))    tagsHtml += `<span class="tag tag-amber">🟠 Aguard. terceiros</span>`;
+  if (marc.includes('planejado'))     tagsHtml += `<span class="tag" style="background:#EDE9FE;color:#5B21B6;">📅 Planejado da semana</span>`;
+  if (marc.includes('a-iniciar-bucket')) tagsHtml += `<span class="tag tag-blue">⚪ A iniciar</span>`;
+  if (marc.includes('concluido-bucket')) tagsHtml += `<span class="tag tag-green">✅ Concluído</span>`;
+  document.getElementById('dp-tags').innerHTML = tagsHtml;
+
+  // Checklist
+  document.getElementById('dp-checklist').innerHTML = CHECKLIST_ITEMS.map(item => {
+    const done = c.checklist?.[item.key];
+    return `<div class="check-full-row" onclick="toggleCheck('${c.id}','${item.key}',event,true)">
+      <div class="check-full-box ${done ? 'checked' : ''}"></div>
+      <span class="check-full-text ${done ? 'checked' : ''}">${item.label}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dp-prog-label').textContent = `${prog.feitos} de ${prog.total} etapas concluídas (${prog.pct}%)`;
+  document.getElementById('dp-prog-bar').style.width = prog.pct + '%';
+
+  // Datas
+  const rows1 = [
+    ['Início', c.inicio ? fmtData(c.inicio) : '—'],
+    ['Término', c.termino ? fmtData(c.termino) : '—'],
+    ['Dias', c.dias || '—'],
+    ['Horário', c.horario || '—'],
+    ['Carga Horária', c.ch ? c.ch + 'h' : '—'],
+  ];
+  document.getElementById('dp-datas').innerHTML = rows1.map(([k,v]) =>
+    `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${esc(v)}</span></div>`
+  ).join('');
+
+  // Info
+  const rows2 = [
+    ['Empresa', c.empresa || '—'],
+    ['Parceiro / Canal', c.parceiro || '—'],
+    ['Vagas', c.vagas || '—'],
+    ['Participantes', c.participantes || '—'],
+    ['Professor', c.professor || '—'],
+    ['Ambiente', c.ambiente || '—'],
+    ['Modalidade', c.modalidade || '—'],
+    ['Oferta SIGE', c.sige || '—'],
+    ['Evento', c.evento || '—'],
+    ['Pasta', c.pasta || '—'],
+  ];
+  document.getElementById('dp-info').innerHTML = rows2.map(([k,v]) =>
+    `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val">${esc(v)}</span></div>`
+  ).join('');
+
+  // Obs
+  if (c.obs) {
+    document.getElementById('dp-obs-section').style.display = 'block';
+    document.getElementById('dp-obs').textContent = c.obs;
+  } else {
+    document.getElementById('dp-obs-section').style.display = 'none';
+  }
+
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function fecharDetalhe() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  cursoDetalheId = null;
+}
+
+function editarCursoAtual() {
+  const id = cursoDetalheId;
+  fecharDetalhe();
+  abrirModal(id);
+}
+
+function excluirCursoAtual() {
+  if (!confirm('Excluir este curso? Esta ação não pode ser desfeita.')) return;
+  cursos = cursos.filter(x => x.id !== cursoDetalheId);
+  salvar();
+  fecharDetalhe();
+  render();
+  toast('🗑 Curso excluído');
+}
+
+// ═══════════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════════
+function toggleCheck(id, key, e, rederDetail) {
+  e.stopPropagation();
+  const c = cursos.find(x => x.id === id);
+  if (!c) return;
+  if (!c.checklist) c.checklist = {};
+  c.checklist[key] = !c.checklist[key];
+  salvar();
+  render();
+  if (rederDetail) abrirDetalhe(id);
+}
+
+// ═══════════════════════════════════════════
+// VIEW FOCO — REVISÃO DE TAREFAS
+// ═══════════════════════════════════════════
+let focoIdx = 0;
+let focoFiltro = 'todos';
+let focoLista = [];
+
+function setFocoFiltro(f, el) {
+  focoFiltro = f;
+  focoIdx = 0;
+  document.querySelectorAll('#foco-filtros .filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderFoco();
+}
+
+function getFocoLista() {
+  return cursos.filter(c => {
+    const status = getStatus(c);
+    const prio   = c.prioridade || [];
+    const marc   = c.marcadores || [];
+    if (focoFiltro === 'todos')        return true;
+    if (focoFiltro === 'a-iniciar')    return status === 'a-iniciar';
+    if (focoFiltro === 'em-andamento') return status === 'em-andamento';
+    if (focoFiltro === 'concluido')    return status === 'concluido';
+    if (focoFiltro === 'aguardando')   return marc.includes('aguardando') || status === 'aguardando';
+    if (focoFiltro === 'prio-urgente') return prio.includes('Urgente');
+    return true;
+  });
+}
+
+function renderFoco() {
+  focoLista = getFocoLista();
+  if (focoIdx >= focoLista.length) focoIdx = 0;
+
+  const wrap = document.getElementById('foco-card-wrap');
+  const prevBtn = document.getElementById('foco-prev');
+  const nextBtn = document.getElementById('foco-next');
+  if (!wrap) return;
+
+  if (focoLista.length === 0) {
+    wrap.innerHTML = `<div class="foco-card" style="padding:48px;text-align:center;">
+      <div style="font-size:32px;margin-bottom:12px;">🎯</div>
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Nenhum curso neste filtro</div>
+      <div style="font-size:13px;color:var(--text2);">Tente selecionar outro filtro acima.</div>
+    </div>`;
+    document.getElementById('foco-dots').innerHTML = '';
+    return;
+  }
+
+  // Dots de navegação
+  const dots = document.getElementById('foco-dots');
+  dots.innerHTML = focoLista.map((c, i) => {
+    const prog = getProgresso(c);
+    const cls  = i === focoIdx ? 'foco-dot active' : prog.pct === 100 ? 'foco-dot done' : 'foco-dot';
+    return `<div class="${cls}" onclick="focoGoTo(${i})" title="${esc(c.nome)}"></div>`;
+  }).join('');
+
+  // Contador
+  document.querySelector('.foco-counter') && (document.querySelector('.foco-counter').textContent = `${focoIdx + 1} / ${focoLista.length}`);
+
+  if (prevBtn) prevBtn.disabled = focoIdx === 0;
+  if (nextBtn) nextBtn.disabled = focoIdx === focoLista.length - 1;
+
+  const c = focoLista[focoIdx];
+  renderFocoCard(c, wrap);
+}
+
+function renderFocoCard(c, wrap) {
+  const status = getStatus(c);
+  const stag   = getStatusTag(status);
+  const prog   = getProgresso(c);
+  const prio   = (c.prioridade || []);
+  const marc   = (c.marcadores || []);
+
+  const tags = [
+    `<span class="tag ${stag.cls}">${stag.label}</span>`,
+    c.modalidade ? `<span class="tag tag-gray">${esc(c.modalidade)}</span>` : '',
+    prio.includes('Urgente')    ? `<span class="tag tag-red">🚨 Urgente</span>` : '',
+    prio.includes('Alta')       ? `<span class="tag tag-red">Alta</span>` : '',
+    prio.includes('Importante') ? `<span class="tag" style="background:#FEF3C7;color:#92400E;">⭐ Importante</span>` : '',
+    marc.includes('aguardando') ? `<span class="tag tag-amber">🟠 Aguardando</span>` : '',
+    marc.includes('planejado')  ? `<span class="tag" style="background:#EDE9FE;color:#5B21B6;">📅 Planejado</span>` : '',
+  ].filter(Boolean).join('');
+
+  const checks = CHECKLIST_ITEMS.map(item => {
+    const done = c.checklist?.[item.key];
+    return `<div class="check-full-row" onclick="toggleCheckFoco('${c.id}','${item.key}')">
+      <div class="check-full-box ${done ? 'checked' : ''}"></div>
+      <span class="check-full-text ${done ? 'checked' : ''}">${item.label}</span>
+    </div>`;
+  }).join('');
+
+  const campos = [
+    ['Empresa',       c.empresa],
+    ['Parceiro/Canal',c.parceiro],
+    ['Início',        c.inicio ? fmtData(c.inicio) : '—'],
+    ['Término',       c.termino ? fmtData(c.termino) : '—'],
+    ['Dias',          c.dias],
+    ['Horário',       c.horario],
+    ['Carga Horária', c.ch ? c.ch + 'h' : ''],
+    ['Vagas',         c.vagas],
+    ['Participantes', c.participantes],
+    ['Professor',     c.professor],
+    ['Ambiente',      c.ambiente],
+    ['Modalidade',    c.modalidade],
+    ['Oferta SIGE',   c.sige],
+    ['Evento',        c.evento],
+    ['Pasta',         c.pasta],
+  ].filter(([,v]) => v && v !== '-' && v !== '?');
+
+  wrap.innerHTML = `
+    <div class="foco-card">
+      <div class="foco-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+          <div class="foco-titulo">${esc(c.nome)}</div>
+          <span class="foco-counter" style="font-size:12px;color:var(--text3);white-space:nowrap;margin-top:4px;">${focoIdx+1} / ${focoLista.length}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">${tags}</div>
+      </div>
+      <div class="foco-body">
+        <div class="foco-section">
+          <div class="foco-section-label">Etapas administrativas</div>
+          <div class="checklist-full">${checks}</div>
+          <div style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px;">
+              <span>Progresso</span><span>${prog.feitos}/${prog.total} — ${prog.pct}%</span>
+            </div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+          </div>
+        </div>
+        <div class="foco-section">
+          <div class="foco-section-label">Dados do curso</div>
+          <div class="foco-grid">
+            ${campos.map(([k,v]) => `
+              <div class="foco-field">
+                <div class="foco-field-label">${k}</div>
+                <div class="foco-field-val">${esc(v)}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+        ${c.obs ? `<div class="foco-section">
+          <div class="foco-section-label">Observações</div>
+          <p style="font-size:13px;color:var(--text2);line-height:1.6;">${esc(c.obs)}</p>
+        </div>` : ''}
+      </div>
+      <div class="foco-footer">
+        <button class="btn btn-ghost btn-sm" onclick="focoEditarAtual()">✏️ Editar curso</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="focoNav(-1)" ${focoIdx===0?'disabled':''}>← Anterior</button>
+          <button class="btn btn-primary btn-sm" onclick="focoNav(1)" ${focoIdx===focoLista.length-1?'disabled':''}>Próximo →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function focoNav(dir) {
+  focoIdx = Math.max(0, Math.min(focoLista.length - 1, focoIdx + dir));
+  renderFoco();
+}
+
+function focoGoTo(idx) {
+  focoIdx = idx;
+  renderFoco();
+}
+
+function focoEditarAtual() {
+  const c = focoLista[focoIdx];
+  if (!c) return;
+  abrirModal(c.id);
+}
+
+function toggleCheckFoco(id, key) {
+  const c = cursos.find(x => x.id === id);
+  if (!c) return;
+  if (!c.checklist) c.checklist = {};
+  c.checklist[key] = !c.checklist[key];
+  salvar();
+  renderFoco();
+  renderStats();
+}
+
+// ═══════════════════════════════════════════
+// EXPORTAR XML
+// ═══════════════════════════════════════════
+function xmlEsc(v) {
+  return String(v || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&apos;');
+}
+
+function exportarDados() {
+  const linhas = cursos.map(c => `  <Curso>
+    <id>${xmlEsc(c.id)}</id>
+    <NomeDaTarefa>${xmlEsc(c.nome)}</NomeDaTarefa>
+    <Empresa>${xmlEsc(c.empresa)}</Empresa>
+    <ParceiroCanalg>${xmlEsc(c.parceiro)}</ParceiroCanalg>
+    <Inicio>${xmlEsc(c.inicio)}</Inicio>
+    <Termino>${xmlEsc(c.termino)}</Termino>
+    <CH>${xmlEsc(c.ch)}</CH>
+    <Dias>${xmlEsc(c.dias)}</Dias>
+    <Horario>${xmlEsc(c.horario)}</Horario>
+    <Vagas>${xmlEsc(c.vagas)}</Vagas>
+    <Modalidade>${xmlEsc(c.modalidade)}</Modalidade>
+    <Ambiente>${xmlEsc(c.ambiente)}</Ambiente>
+    <Professor>${xmlEsc(c.professor)}</Professor>
+    <OfertaSIGE>${xmlEsc(c.sige)}</OfertaSIGE>
+    <Evento>${xmlEsc(c.evento)}</Evento>
+    <Pasta>${xmlEsc(c.pasta)}</Pasta>
+    <Participantes>${xmlEsc(c.participantes)}</Participantes>
+    <Observacoes>${xmlEsc(c.obs)}</Observacoes>
+    <Checklist>
+      <Matricula>${c.checklist?.matricula ? 'true' : 'false'}</Matricula>
+      <Publicacao>${c.checklist?.publicacao ? 'true' : 'false'}</Publicacao>
+      <Avaliacao>${c.checklist?.avaliacao ? 'true' : 'false'}</Avaliacao>
+      <Certificado>${c.checklist?.certificado ? 'true' : 'false'}</Certificado>
+    </Checklist>
+  </Curso>`).join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Cursos exportado="${new Date().toISOString()}" total="${cursos.length}">
+${linhas}
+</Cursos>`;
+
+  baixarArquivo(xml, `senai_cursos_${new Date().toISOString().slice(0,10)}.xml`, 'application/xml');
+  toast('⬇ XML exportado com sucesso!');
+}
+
+function baixarModeloXML() {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  MODELO XML — SENAI Gerenciador de Cursos
+  Preencha um bloco <Curso> por linha da sua planilha.
+  Datas no formato AAAA-MM-DD (ex: 2025-03-15)
+  Checklist: use "true" para marcado, "false" para desmarcado
+-->
+<Cursos>
+  <Curso>
+    <NomeDaTarefa>Técnico em Eletroeletrônica — Turma A</NomeDaTarefa>
+    <Empresa>Empresa ABC</Empresa>
+    <ParceiroCanalg>SENAI SP</ParceiroCanalg>
+    <Inicio>2025-03-10</Inicio>
+    <Termino>2025-04-30</Termino>
+    <CH>40</CH>
+    <Dias>Seg / Qua / Sex</Dias>
+    <Horario>18h – 22h</Horario>
+    <Vagas>20</Vagas>
+    <Modalidade>Presencial</Modalidade>
+    <Ambiente>Lab. Elétrica 2</Ambiente>
+    <Professor>João Silva</Professor>
+    <OfertaSIGE>OF-2025-001</OfertaSIGE>
+    <Evento>EVT-0042</Evento>
+    <Pasta>Pasta A42</Pasta>
+    <Participantes>18</Participantes>
+    <Observacoes>Turma patrocinada pela empresa.</Observacoes>
+    <Checklist>
+      <Matricula>true</Matricula>
+      <Publicacao>false</Publicacao>
+      <Avaliacao>false</Avaliacao>
+      <Certificado>false</Certificado>
+    </Checklist>
+  </Curso>
+  <Curso>
+    <NomeDaTarefa>Qualificação em Soldagem — Turma B</NomeDaTarefa>
+    <Empresa>Metalúrgica Delta</Empresa>
+    <ParceiroCanalg>SENAI MG</ParceiroCanalg>
+    <Inicio>2025-04-05</Inicio>
+    <Termino>2025-05-20</Termino>
+    <CH>80</CH>
+    <Dias>Ter / Qui</Dias>
+    <Horario>07h – 12h</Horario>
+    <Vagas>15</Vagas>
+    <Modalidade>Presencial</Modalidade>
+    <Ambiente>Lab. Soldagem 1</Ambiente>
+    <Professor>Maria Fernanda</Professor>
+    <OfertaSIGE>OF-2025-002</OfertaSIGE>
+    <Evento>EVT-0043</Evento>
+    <Pasta>Pasta A43</Pasta>
+    <Participantes>15</Participantes>
+    <Observacoes></Observacoes>
+    <Checklist>
+      <Matricula>false</Matricula>
+      <Publicacao>false</Publicacao>
+      <Avaliacao>false</Avaliacao>
+      <Certificado>false</Certificado>
+    </Checklist>
+  </Curso>
+</Cursos>`;
+  baixarArquivo(xml, 'modelo_cursos_senai.xml', 'application/xml');
+  toast('📄 Modelo XML baixado!');
+}
+
+function baixarArquivo(conteudo, nome, tipo) {
+  const blob = new Blob([conteudo], { type: tipo });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nome;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════
+// IMPORTAR XML
+// ═══════════════════════════════════════════
+
+// Lê texto de uma tag XML (case-insensitive, pega a primeira ocorrência)
+function xmlTag(el, tag) {
+  // Tenta nome exato, depois case-insensitive
+  let found = el.getElementsByTagName(tag)[0];
+  if (!found) {
+    const all = el.getElementsByTagName('*');
+    for (let n of all) {
+      if (n.tagName.toLowerCase() === tag.toLowerCase()) { found = n; break; }
+    }
+  }
+  return found ? (found.textContent || '').trim() : '';
+}
+
+// Detecta se é XML do Excel (SpreadsheetML) ou nosso formato
+function detectarFormatoXML(doc) {
+  const root = doc.documentElement.tagName;
+  if (root === 'Workbook' || doc.querySelector('Worksheet') || doc.querySelector('Row')) return 'excel';
+  if (doc.querySelector('Cursos') || doc.querySelector('Curso')) return 'senai';
+  // Tenta genérico: qualquer elemento filho repetido
+  return 'generico';
+}
+
+// Mapeia nomes alternativos de colunas para nossos campos
+const MAPA_COLUNAS = {
+  nome:         ['NomeDaTarefa','Nome da Tarefa','Nome','Tarefa','Task','Title','Titulo','NomeCurso','Curso'],
+  empresa:      ['Empresa','Company','Organização','Organizacao'],
+  parceiro:     ['ParceiroCanalg','Parceiro','Canal','ParceiroCanalG','ParceiroCanal','Partner'],
+  inicio:       ['Inicio','Início','DataInicio','Data de Início','StartDate','Start','DataInicial'],
+  termino:      ['Termino','Término','DataTermino','Data de Término','EndDate','End','DataFinal'],
+  ch:           ['CH','CargaHoraria','Carga Horária','CargaHorária','Hours','Horas'],
+  dias:         ['Dias','DiasSemanais','DiasDaSemana','Dias da Semana'],
+  horario:      ['Horario','Horário','Schedule','Time'],
+  vagas:        ['Vagas','Capacidade','Slots'],
+  modalidade:   ['Modalidade','Modality','Mode','Modo'],
+  ambiente:     ['Ambiente','Sala','Room','Local','Location'],
+  professor:    ['Professor','Instrutor','Teacher','Instructor','Docente'],
+  sige:         ['OfertaSIGE','Oferta SIGE','SIGE','OfertaSige','CodigoSIGE'],
+  evento:       ['Evento','Event','CodigoEvento'],
+  pasta:        ['Pasta','Folder','Diretorio'],
+  participantes:['Participantes','Alunos','Inscritos','Students'],
+  obs:          ['Observacoes','Observações','Obs','Notes','Notas','Observacao'],
+};
+
+function resolverCampo(el, campo) {
+  for (const alias of MAPA_COLUNAS[campo] || []) {
+    const v = xmlTag(el, alias);
+    if (v) return v;
+  }
+  return '';
+}
+
+// Normaliza data para AAAA-MM-DD
+function normalizarData(str) {
+  if (!str) return '';
+  str = str.trim();
+  // Já no formato correto
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0,10);
+  // DD/MM/AAAA
+  const br = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (br) return `${br[3]}-${br[2].padStart(2,'0')}-${br[1].padStart(2,'0')}`;
+  // MM/DD/AAAA
+  const us = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (us) return `${us[3]}-${us[1].padStart(2,'0')}-${us[2].padStart(2,'0')}`;
+  // Número serial do Excel (dias desde 1900-01-01)
+  if (/^\d{4,6}$/.test(str)) {
+    const d = new Date((parseInt(str) - 25569) * 86400 * 1000);
+    if (!isNaN(d)) return d.toISOString().slice(0,10);
+  }
+  return '';
+}
+
+function parsearXMLSenai(doc) {
+  const nos = doc.querySelectorAll('Curso, curso');
+  return Array.from(nos).map(el => ({
+    id:           xmlTag(el,'id') || gerarId(),
+    nome:         resolverCampo(el,'nome'),
+    empresa:      resolverCampo(el,'empresa'),
+    parceiro:     resolverCampo(el,'parceiro'),
+    inicio:       normalizarData(resolverCampo(el,'inicio')),
+    termino:      normalizarData(resolverCampo(el,'termino')),
+    ch:           resolverCampo(el,'ch'),
+    dias:         resolverCampo(el,'dias'),
+    horario:      resolverCampo(el,'horario'),
+    vagas:        resolverCampo(el,'vagas'),
+    modalidade:   resolverCampo(el,'modalidade'),
+    ambiente:     resolverCampo(el,'ambiente'),
+    professor:    resolverCampo(el,'professor'),
+    sige:         resolverCampo(el,'sige'),
+    evento:       resolverCampo(el,'evento'),
+    pasta:        resolverCampo(el,'pasta'),
+    participantes:resolverCampo(el,'participantes'),
+    obs:          resolverCampo(el,'obs'),
+    checklist: {
+      matricula:   xmlTag(el,'Matricula') === 'true',
+      publicacao:  xmlTag(el,'Publicacao') === 'true',
+      avaliacao:   xmlTag(el,'Avaliacao') === 'true',
+      certificado: xmlTag(el,'Certificado') === 'true',
+    }
+  })).filter(c => c.nome);
+}
+
+function parsearXMLExcel(doc) {
+  // SpreadsheetML: pega cabeçalhos da primeira linha e mapeia as demais
+  const rows = Array.from(doc.querySelectorAll('Row'));
+  if (rows.length < 2) return [];
+
+  // Linha de cabeçalho
+  const headers = Array.from(rows[0].querySelectorAll('Cell')).map(cell => {
+    const d = cell.querySelector('Data');
+    return d ? d.textContent.trim() : '';
+  });
+
+  function valorCelula(row, idx) {
+    const cells = Array.from(row.querySelectorAll('Cell'));
+    // Excel pode pular células (ss:Index)
+    const mapa = {};
+    let colAtual = 1;
+    cells.forEach(cell => {
+      const ssIdx = cell.getAttribute('ss:Index');
+      if (ssIdx) colAtual = parseInt(ssIdx);
+      const d = cell.querySelector('Data');
+      mapa[colAtual] = d ? d.textContent.trim() : '';
+      colAtual++;
+    });
+    return mapa[idx + 1] || '';
+  }
+
+  return rows.slice(1).map(row => {
+    // Monta objeto genérico pelo cabeçalho
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = valorCelula(row, i); });
+
+    // Resolve campos usando mapa de aliases
+    const c = {
+      id: gerarId(),
+      checklist: {}
+    };
+    for (const campo of Object.keys(MAPA_COLUNAS)) {
+      for (const alias of MAPA_COLUNAS[campo]) {
+        if (obj[alias] !== undefined && obj[alias] !== '') {
+          c[campo] = campo === 'inicio' || campo === 'termino'
+            ? normalizarData(obj[alias])
+            : obj[alias];
+          break;
+        }
+      }
+      if (!c[campo]) c[campo] = '';
+    }
+    return c;
+  }).filter(c => c.nome);
+}
+
+function parsearXMLGenerico(doc) {
+  // Tenta encontrar elementos repetidos que pareçam registros
+  const root = doc.documentElement;
+  const filhos = Array.from(root.children);
+  if (filhos.length === 0) return [];
+
+  // Pega o tag mais comum (provavelmente o registro)
+  const tagContagem = {};
+  filhos.forEach(f => { tagContagem[f.tagName] = (tagContagem[f.tagName]||0)+1; });
+  const tagPrincipal = Object.entries(tagContagem).sort((a,b)=>b[1]-a[1])[0][0];
+  const registros = doc.querySelectorAll(tagPrincipal);
+
+  return Array.from(registros).map(el => {
+    const c = { id: gerarId(), checklist: {} };
+    for (const campo of Object.keys(MAPA_COLUNAS)) {
+      for (const alias of MAPA_COLUNAS[campo]) {
+        const v = xmlTag(el, alias);
+        if (v) {
+          c[campo] = campo === 'inicio' || campo === 'termino' ? normalizarData(v) : v;
+          break;
+        }
+      }
+      if (!c[campo]) c[campo] = '';
+    }
+    return c;
+  }).filter(c => c.nome);
+}
+
+function importarDados() {
+  // Mostra modal de importação
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function fecharImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+}
+
+function executarImportacao(modo) {
+  // modo: 'substituir' | 'adicionar'
+  fecharImportModal();
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xml,application/xml,text/xml';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(ev.target.result, 'application/xml');
+
+        // Checa erros de parse
+        const err = doc.querySelector('parsererror');
+        if (err) { toast('❌ XML inválido ou mal formatado'); return; }
+
+        const formato = detectarFormatoXML(doc);
+        let importados = [];
+
+        if (formato === 'excel')   importados = parsearXMLExcel(doc);
+        else if (formato === 'senai') importados = parsearXMLSenai(doc);
+        else                        importados = parsearXMLGenerico(doc);
+
+        if (importados.length === 0) {
+          toast('⚠️ Nenhum curso encontrado no XML. Verifique o formato.');
+          return;
+        }
+
+        if (modo === 'substituir') {
+          cursos = importados;
+          toast(`✅ ${importados.length} cursos importados (dados anteriores substituídos)`);
+        } else {
+          // Adicionar — evita duplicar por Evento ou nome+data
+          let novos = 0;
+          importados.forEach(imp => {
+            const existe = cursos.find(c =>
+              (imp.evento && c.evento && imp.evento === c.evento) ||
+              (imp.nome === c.nome && imp.inicio === c.inicio)
+            );
+            if (!existe) { cursos.push(imp); novos++; }
+          });
+          toast(`✅ ${novos} cursos novos adicionados (${importados.length - novos} já existiam)`);
+        }
+
+        salvar();
+        render();
+      } catch(ex) {
+        toast('❌ Erro ao processar o arquivo XML');
+        console.error(ex);
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  };
+  input.click();
+}
+
+function limparTudo() {
+  if (!confirm('Apagar TODOS os cursos? Esta ação não pode ser desfeita.')) return;
+  cursos = [];
+  salvar();
+  render();
+  toast('🗑 Todos os cursos removidos');
+}
+
+// ═══════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════
+function fmtData(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Prioridade e marcadores — CSS :has() cuida do visual automaticamente, nada a fazer aqui
+
+// Compatibilidade com cursos antigos que usavam prioridade para Urgente/Aguardando
+function marcadoresLegado(c) {
+  const marc = [];
+  const prio = (c?.prioridade || '').toLowerCase();
+  // bucket_original legado
+  const bkt = (c?.bucket_original || '').toLowerCase();
+  if (prio === 'aguardando' || bkt.includes('aguardando')) marc.push('aguardando');
+  if (bkt.includes('planejado')) marc.push('planejado');
+  if (bkt.includes('conclu'))    marc.push('concluido-bucket');
+  if (bkt.includes('não iniciado') || bkt === 'nao iniciado') marc.push('a-iniciar-bucket');
+  return marc;
+}
+
+function prioLegado(c) {
+  // Converte prioridade string legada para array
+  const p = (c?.prioridade || '');
+  const pl = p.toLowerCase();
+  if (pl === 'urgente')    return ['Urgente'];
+  if (pl === 'aguardando') return [];
+  if (pl === 'baixa')      return ['Baixa'];
+  if (pl === 'média' || pl === 'media') return ['Média'];
+  if (pl === 'alta')       return ['Alta'];
+  if (Array.isArray(c?.prioridade)) return c.prioridade;
+  return [];
+}
+
+// Migrar ao carregar
+cursos = cursos.map(c => {
+  if (!c.marcadores) c.marcadores = marcadoresLegado(c);
+  if (!Array.isArray(c.prioridade)) c.prioridade = prioLegado(c);
+  return c;
+});
+salvar();
+
+// Keyboard: ESC fecha modais, setas navegam no foco
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { fecharModal(); fecharDetalhe(); return; }
+  if (document.getElementById('view-foco')?.classList.contains('active')) {
+    if (e.key === 'ArrowRight') { focoNav(1);  e.preventDefault(); }
+    if (e.key === 'ArrowLeft')  { focoNav(-1); e.preventDefault(); }
+  }
+});
+
+// ═══════════════════════════════════════════
+// DADOS DE EXEMPLO (somente na primeira abertura)
+// ═══════════════════════════════════════════
+// Dados reais importados da planilha
+if (cursos.length === 0) {
+  cursos = [{"id": "kr8x0jeiqu", "nome": "Montagem e Manutenção de Computadores", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-04", "termino": "2026-05-21", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 109", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "17596", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "chqqnmmfvi", "nome": "Excel Básico - capacitação interna", "empresa": "SENAI", "parceiro": "-", "inicio": "2026-02-25", "termino": "2026-03-06", "ch": "20", "dias": "Segundas, Quartas e Quintas", "horario": "12h30 às 17h30", "vagas": "25", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "Lab 202", "professor": "Adriano", "sige": "Isento - Regimental", "evento": "1059053", "pasta": "20505", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: Via portal do aluno", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "lnjagkg90a", "nome": "Informática Aplicada em Chromebook: Comunicação e Eficiência SEDUC", "empresa": "Colégio de período integral José Luciano", "parceiro": "CEPI José Luciano", "inicio": "2026-03-06", "termino": "2026-03-06", "ch": "8", "dias": "Sexta", "horario": "8h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "- Escola que o Professor atua", "professor": "Welington Júlio", "sige": "Isento - SENAI", "evento": "1062214", "pasta": "21679", "participantes": "6", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Realizado | Certificado: Solicitado p/ secretaria", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "7jmx8m6bj0", "nome": "Montagem e Manutenção em Celular", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-28", "termino": "2026-05-12", "ch": "30", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "15", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "Raul Lucio", "sige": "Comunidade", "evento": "?", "pasta": "17963", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "qz8gn8vp6i", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "", "termino": "2026-03-27", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Planejado da Semana", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "9j43y7tz1r", "nome": "Microsoft Power BI Essencial", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-04-10", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Marcos Eduardo", "sige": "Comunidade", "evento": "1058194", "pasta": "18982", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "e04qfl4e68", "nome": "Microsoft Power BI Essencial", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-05", "termino": "2026-05-22", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "18982", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "v1ruegka0p", "nome": "Excel intermediário e avançado", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "b8frcdx8w1", "nome": "Introdutório de CANVAS - Criando designs incríveis sem ser designer", "empresa": "FIEG", "parceiro": "NUREM / Rayza", "inicio": "2026-03-13", "termino": "2026-03-27", "ch": "20", "dias": "Sexta e Sábado", "horario": "13h30 às 17h30", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Sala 206", "professor": "Gabriel Lira", "sige": "Empresa (fechado)", "evento": "1058140", "pasta": "21398", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Em andamento", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "9vvumuzf9t", "nome": "Academia de Líderes - Direção e Gerência I GESTÃO PARA RESULTADOS", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-05-22", "termino": "2026-06-13", "ch": "36", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "310", "professor": "?", "sige": "Empresa (fechado)", "evento": "1043403", "pasta": "21370", "participantes": "41", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "577relz9zn", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-06", "termino": "2026-04-17", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "buvhc4aqju", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 1", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "45", "modalidade": "Qualificação", "ambiente": "105", "professor": "Thiago", "sige": "Isento - Regimental", "evento": "1059091", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "2m75t070bg", "nome": "Almoxarifado para Construção Civil", "empresa": "ALMOB", "parceiro": "Almob André", "inicio": "", "termino": "", "ch": "20", "dias": "", "horario": "8h às 17h", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "103", "professor": "Allan / André / João Paulo", "sige": "Comunidade/Empresa (Misto)", "evento": "1060925", "pasta": "19588", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: 9/25 | Certificado: Pendente emissão já sinalizei email no dia 16/03 com resultados gerados", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "mnlz43maoy", "nome": "Academia de Líderes - Supervisão Educacional I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "g9ipx1lu3p", "nome": "Excel intermediário e avançado", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-09", "termino": "2026-07-04", "ch": "30", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Kirk Douglas", "sige": "Comunidade", "evento": "?", "pasta": "16748", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "rzexz30rc2", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-06-20", "ch": "40", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "-", "sige": "Comunidade", "evento": "1058321", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "knu06cof0e", "nome": "Excel Básico - Superior FATESG", "empresa": "-", "parceiro": "FATESG", "inicio": "2026-03-14", "termino": "2026-04-11", "ch": "20", "dias": "Sábado", "horario": "13h às 18h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 200", "professor": "Vitor Resende", "sige": "Isento - SENAI", "evento": "1062138", "pasta": "20505", "participantes": "20", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "iqh6ouk2xv", "nome": "Excel intermediário e avançado", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-05-16", "ch": "30", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Kirk Douglas", "sige": "Comunidade", "evento": "1058197", "pasta": "16748", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "401gurbwtc", "nome": "Gestão de Pré-Venda, vendas e pós-vendas", "empresa": "FLY PARTS MANUTENCAO AERONAUTICA LTDA", "parceiro": "SENAI", "inicio": "2026-02-24", "termino": "2026-03-12", "ch": "16", "dias": "Terça e Quinta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 103", "professor": "Cristal Sivadon", "sige": "Empresa (fechado)", "evento": "1059087", "pasta": "21629", "participantes": "15", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: IMPRESSOS E ENTREGUES PARA AÇÃO DE CERIMÔNIA DE ENTREGAS", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "latytgqlar", "nome": "Desenvolvimento de Agentes de Inteligência Artificial (NO CODE)", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-05-05", "ch": "80", "dias": "Segunda a Sexta", "horario": "13h30 às 17h30", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "-", "sige": "Comunidade", "evento": "1058248", "pasta": "21595", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "fjf6ekismt", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 3", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "20", "modalidade": "Qualificação", "ambiente": "Lab 101", "professor": "Andrey", "sige": "Isento - SENAI", "evento": "1061690", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "w4tma81ld0", "nome": "Academia de Líderes", "empresa": "SENAI", "parceiro": "FIEGEmpresa: SENAI", "inicio": "2026-03-20", "termino": "2026-05-16", "ch": "36", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "", "professor": "", "sige": "Empresa (fechado)", "evento": "1043904", "pasta": "21369", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Planejado da Semana", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "zsuhhz6eeh", "nome": "Montagem e Manutenção em Celular", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-04-07", "ch": "30", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "15", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "Raul Lucio", "sige": "Comunidade", "evento": "1058191", "pasta": "17963", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Planejado da Semana", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "5vwq6l4lal", "nome": "Introdutório de CANVAS - Criando designs incríveis sem ser designer", "empresa": "FIEG", "parceiro": "SENAI", "inicio": "2026-04-11", "termino": "2026-05-23", "ch": "20", "dias": "Sábado", "horario": "08h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "Gabriel Lira", "sige": "Empresa (fechado)", "evento": "1058330", "pasta": "21398", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "yf5pq0hr1c", "nome": "Academia de Líderes - Coordenação STI I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "82m93ggldp", "nome": "Academia de Líderes - Supervisão Técnica I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "s85bcmdq2t", "nome": "Assistente de Desenvolvimento de Inteligência Artificial Comunidade", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-23", "termino": "2026-05-07", "ch": "200 HR", "dias": "Segunda a Sexta", "horario": "13h30 às 17h30", "vagas": "45", "modalidade": "Qualificação", "ambiente": "Lab 105", "professor": "Lucas Medeiros", "sige": "Isento - Regimental", "evento": "1058092", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "7qi4zsu8xy", "nome": "Operação de Drones Profissionais", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-03-29", "ch": "16", "dias": "Sab e Dom", "horario": "08h às 17h", "vagas": "16", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "-", "sige": "Comunidade", "evento": "1057884", "pasta": "19545", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "z32vlsyflk", "nome": "Formação nas novas Tecnologias emergentes de componentes de informática", "empresa": "FUJIOKA ELETRO IMAGEM S/A", "parceiro": "Fujioka", "inicio": "2026-03-04", "termino": "2026-03-06", "ch": "24", "dias": "Quarta a Sexta", "horario": "8h às 17h", "vagas": "12", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "Lab 109", "professor": "José Veloso", "sige": "Empresa (fechado)", "evento": "1061458", "pasta": "17274", "participantes": "8", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Realizado | Certificado: Solicitado p/ secretaria", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "i0k3950roa", "nome": "Operação de Drones Profissionais", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "jhnnzzgkpx", "nome": "Operação de Drones Profissionais", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "71ym0ozchc", "nome": "Academia de Líderes - Direção I PAINEL ESTRATÉGICO E GOVERNANÇA", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-08-14", "termino": "2026-08-15", "ch": "16", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "30", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "309", "professor": "?", "sige": "Empresa (fechado)", "evento": "1043403", "pasta": "21370", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "3s74stwrtj", "nome": "Montagem e Manutenção de Computadores", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-30", "termino": "2026-05-11", "ch": "80", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 109", "professor": "-", "sige": "Comunidade", "evento": "1058713", "pasta": "17596", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "a3sp67t412", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 2", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "45", "modalidade": "Qualificação", "ambiente": "Lab 101", "professor": "Andrey", "sige": "Isento - Regimental", "evento": "1060602", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "6bedla3za8", "nome": "Assistente de Desenvolvimento de Agentes Inteligentes", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Em andamento", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "0m8vibuj4d", "nome": "Inteligência Artificial na Gestão de Negócios", "empresa": "Prefeitura de Goiânia", "parceiro": "SENAI", "inicio": "2026-03-11", "termino": "2026-03-11", "ch": "4", "dias": "Quarta", "horario": "13h30 às 18h30", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Anfiteatro", "professor": "Alessandro Caetano", "sige": "Isento - SENAI", "evento": "1063073", "pasta": "19341", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: SOLICITADO P/ SECRETARIA", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "1qty08klu2", "nome": "Academia de Líderes - Supervisão Administrativa I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "0jpp5a2f3s", "nome": "Operação de Drones Profissionais", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-25", "termino": "2026-04-26", "ch": "16", "dias": "Sáb e Dom", "horario": "08h às 17h", "vagas": "16", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "19545", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "fyz2obkwc9", "nome": "Academia de Líderes - Supervisão I GESTÃO PARA RESULTADOS", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-04-24", "termino": "2026-05-09", "ch": "24", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "310", "professor": "?", "sige": "Empresa (fechado)", "evento": "?", "pasta": "?", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}];
+  salvar();
+}
+
+// INICIAR
+render();
+</script>
+</body>
+</html>
