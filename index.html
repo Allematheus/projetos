@@ -260,8 +260,8 @@ body {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  min-width: 255px;
-  max-width: 270px;
+  min-width: 265px;
+  max-width: 285px;
   flex-shrink: 0;
   display: flex; flex-direction: column;
   overflow: hidden;
@@ -301,52 +301,70 @@ body {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 11px 13px;
+  padding: 11px 14px 11px 11px;
   cursor: pointer;
-  transition: all .18s cubic-bezier(.4,0,.2,1);
+  transition: box-shadow .18s, border-color .18s, transform .18s;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
 .course-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 14px rgba(27,79,216,.12);
-  transform: translateY(-2px);
+  border-color: rgba(27,79,216,.35);
+  box-shadow: 0 4px 14px rgba(27,79,216,.1);
+  transform: translateY(-1px);
 }
-.course-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--border2);
-  transition: background .18s;
-}
-.course-card:hover::before { background: var(--accent); }
 .course-card-title {
   font-weight: 600;
   font-size: 12.5px;
   color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.4;
+  padding-left: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.course-card-evento {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text3);
+  padding-left: 6px;
   margin-bottom: 5px;
-  line-height: 1.35;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-card-meta {
+  font-size: 11px; color: var(--text2);
+  display: flex; flex-direction: column; gap: 3px;
   padding-left: 6px;
 }
-.course-card-meta { font-size: 11px; color: var(--text2); display: flex; flex-direction: column; gap: 2px; padding-left: 6px; }
-.course-card-row { display: flex; align-items: center; gap: 4px; }
-.course-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 7px; padding-left: 6px; }
+.course-card-row { display: flex; align-items: center; gap: 4px; overflow: hidden; }
+.course-card-row span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.course-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; padding-left: 6px; }
+/* Professor/WA — sempre visível (não depende mais de hover) */
+.card-prof-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 5px; padding-left: 6px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
 /* Checklist mini — oculto por padrão, aparece no hover */
 .checklist-mini {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .22s cubic-bezier(.4,0,.2,1), opacity .18s, margin-top .18s;
+  transition: max-height .25s cubic-bezier(.4,0,.2,1), opacity .2s ease, margin-top .2s ease;
   opacity: 0;
   margin-top: 0;
 }
 .course-card:hover .checklist-mini {
-  max-height: 120px;
+  max-height: 150px;
   opacity: 1;
   margin-top: 8px;
 }
-.progress-mini { margin-top: 6px; padding-left: 6px; }
 .tag {
   font-size: 10px;
   font-weight: 600;
@@ -791,6 +809,29 @@ tbody tr:hover td { background: #FAFAF8; }
   display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;
 }
 
+/* ── WHATSAPP BTN ── */
+.wa-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #25D366; color: #fff;
+  border: none; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px; cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+.wa-btn:hover { background: #1da851; transform: scale(1.04); box-shadow: 0 2px 8px rgba(37,211,102,.35); }
+.wa-btn svg { width: 12px; height: 12px; fill: currentColor; flex-shrink: 0; }
+.prof-contato {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 6px; flex-wrap: wrap;
+}
+.prof-tel {
+  font-size: 11px; color: var(--text3);
+  font-family: 'Inter', sans-serif;
+}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1175,6 +1216,7 @@ tbody tr:hover td { background: #FAFAF8; }
     </div>
     <div class="detail-footer">
       <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editarCursoAtual()">✏️ Editar</button>
+      <div id="dp-wa-btn"></div>
       <button class="btn btn-danger btn-sm" onclick="excluirCursoAtual()">🗑 Excluir</button>
     </div>
   </div>
@@ -1742,50 +1784,98 @@ function renderKanbanAguardando(board) {
 }
 
 function buildCard(c) {
+  // ── dados básicos
   const status = getStatus(c);
-  const stag = getStatusTag(status);
-  const prog = getProgresso(c);
+  const stag   = getStatusTag(status);
+  const prog   = getProgresso(c);
+  const ini    = c.inicio  ? fmtData(c.inicio)  : '—';
+  const fim    = c.termino ? fmtData(c.termino) : '';
 
-  const ini = c.inicio ? fmtData(c.inicio) : '—';
-  const fim = c.termino ? fmtData(c.termino) : '—';
+  // ── cor lateral por status
+  const corStatus = {
+    'concluido'   : '#16A34A',
+    'em-andamento': '#D97706',
+    'aguardando'  : '#D97706',
+    'a-iniciar'   : '#2563EB',
+    'sem-data'    : '#A8A49E',
+  };
+  const cor = corStatus[status] || '#A8A49E';
 
-  const checks = CHECKLIST_ITEMS.map(item => {
-    const done = c.checklist?.[item.key];
+  // ── número do evento (só mostra se for numérico ≥4 dígitos)
+  const evNum = (c.evento && /\d{4,}/.test(c.evento)) ? c.evento.trim() : '';
+
+  // ── professor + WhatsApp
+  const profNome = (c.professor && c.professor !== '-' && c.professor !== '?') ? c.professor : '';
+  const ct       = profNome ? getProfContato(profNome) : null;
+
+  // ── checklist (aparece no hover)
+  const checkItems = CHECKLIST_ITEMS.map(item => {
+    const done = c.checklist?.[item.key] || false;
     return `<div class="check-row" onclick="toggleCheck('${c.id}','${item.key}',event)">
       <div class="check-box-ui ${done ? 'checked' : ''}"></div>
       <span class="check-text ${done ? 'checked' : ''}">${item.label}</span>
     </div>`;
   }).join('');
 
-  // Cor do indicador lateral baseada no status
-  const statusCores = { 'concluido':'var(--green-mid)', 'em-andamento':'var(--amber-mid)', 'aguardando':'#D97706', 'a-iniciar':'var(--blue-mid)', 'sem-data':'var(--text3)' };
-  const lateralCor = statusCores[getStatus(c)] || 'var(--border2)';
+  // ── tags de prioridade/bucket
+  const prio  = c.prioridade  || [];
+  const marc  = c.marcadores  || [];
+  const tagEx = [
+    prio.includes('Urgente')    ? `<span class="tag tag-red">🚨 Urgente</span>`                                     : '',
+    prio.includes('Alta')       ? `<span class="tag tag-red">Alta</span>`                                            : '',
+    prio.includes('Importante') ? `<span class="tag" style="background:#FEF3C7;color:#92400E;">⭐ Imp.</span>`      : '',
+    marc.includes('aguardando') ? `<span class="tag tag-amber">🟠 Aguard.</span>`                                   : '',
+    marc.includes('planejado')  ? `<span class="tag" style="background:#EDE9FE;color:#5B21B6;">📅 Plan.</span>`    : '',
+  ].filter(Boolean).join('');
 
-  return `
-    <div class="course-card" onclick="abrirDetalhe('${c.id}')" style="--card-cor:${lateralCor};">
-      <style>.course-card[style*="--card-cor"]::before{background:var(--card-cor)!important;}</style>
-      <div class="course-card-title">${esc(c.nome)}</div>
-      <div class="course-card-meta">
-        ${c.empresa ? `<div class="course-card-row">🏢 ${esc(c.empresa)}</div>` : ''}
-        <div class="course-card-row">📅 ${ini}${c.termino ? ' → '+fim : ''}</div>
-      </div>
-      <div class="course-card-tags">
-        <span class="tag ${stag.cls}">${stag.label}</span>
-        ${c.ch ? `<span class="tag tag-gray">${c.ch}h</span>` : ''}
-        ${(c.prioridade||[]).includes('Urgente')    ? `<span class="tag tag-red">🚨</span>` : ''}
-        ${(c.prioridade||[]).includes('Alta')       ? `<span class="tag tag-red">Alta</span>` : ''}
-        ${(c.prioridade||[]).includes('Importante') ? `<span class="tag" style="background:#FEF3C7;color:#92400E;">⭐</span>` : ''}
-        ${(c.marcadores||[]).includes('aguardando') ? `<span class="tag tag-amber">🟠</span>` : ''}
-        ${(c.marcadores||[]).includes('planejado')  ? `<span class="tag" style="background:#EDE9FE;color:#5B21B6;">📅</span>` : ''}
-      </div>
-      <div class="checklist-mini">
-        ${checks}
-        <div class="progress-mini" style="margin-top:6px;padding-left:0;">
-          <div class="progress-label">${prog.feitos}/${prog.total} · ${prog.pct}%</div>
-          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+  return `<div class="course-card" onclick="abrirDetalhe('${c.id}')" style="border-left:3px solid ${cor};padding-left:10px;">
+
+    <div style="font-size:12.5px;font-weight:600;color:var(--text);line-height:1.38;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+      ${esc(c.nome)}${evNum ? ` <span style="font-weight:400;color:var(--text3);font-size:11px;">(${esc(evNum)})</span>` : ''}
+    </div>
+
+    ${(c.empresa && c.empresa !== '-') ? `
+    <div style="font-size:11px;color:var(--text2);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+      🏢 ${esc(c.empresa)}
+    </div>` : ''}
+
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">
+      📅 ${ini}${fim ? ' → ' + fim : ''}
+    </div>
+
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:${profNome ? '0' : '0'};">
+      <span class="tag ${stag.cls}">${stag.label}</span>
+      ${c.ch ? `<span class="tag tag-gray">${c.ch}h</span>` : ''}
+      ${tagEx}
+    </div>
+
+    ${profNome ? `
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">👤 ${esc(profNome)}</span>
+      ${ct ? `<a class="wa-btn"
+          href="https://wa.me/${ct.wa}"
+          target="_blank"
+          onclick="event.stopPropagation()"
+          title="${ct.tel}">
+          <svg viewBox="0 0 24 24" style="width:11px;height:11px;fill:#fff;flex-shrink:0;">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.52 5.849L.057 23.882a.5.5 0 0 0 .61.61l6.098-1.458A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.523-5.188-1.432l-.372-.225-3.847.919.944-3.776-.244-.386A9.946 9.946 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+          </svg>
+          ${ct.tel}
+        </a>` : ''}
+    </div>` : ''}
+
+    <div class="checklist-mini">
+      ${checkItems}
+      <div style="margin-top:6px;">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">${prog.feitos}/${prog.total} · ${prog.pct}%</div>
+        <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${prog.pct}%;background:var(--accent);border-radius:2px;"></div>
         </div>
       </div>
-    </div>`;
+    </div>
+
+  </div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -1989,6 +2079,7 @@ function abrirDetalhe(id) {
     ['Vagas', c.vagas || '—'],
     ['Participantes', c.participantes || '—'],
     ['Professor', c.professor || '—'],
+    ['Contato', (()=>{ const ct = getProfContato(c.professor); return ct ? ct.tel : '—'; })()],
     ['Ambiente', c.ambiente || '—'],
     ['Modalidade', c.modalidade || '—'],
     ['Oferta SIGE', c.sige || '—'],
@@ -2005,6 +2096,20 @@ function abrirDetalhe(id) {
     document.getElementById('dp-obs').textContent = c.obs;
   } else {
     document.getElementById('dp-obs-section').style.display = 'none';
+  }
+
+  // Botão WhatsApp do professor
+  const waBtnEl = document.getElementById('dp-wa-btn');
+  if (waBtnEl) {
+    const ct = getProfContato(c.professor);
+    if (ct && ct.wa) {
+      waBtnEl.innerHTML = `<a class="wa-btn" href="https://wa.me/${ct.wa}" target="_blank" style="text-decoration:none;">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:#fff;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.52 5.849L.057 23.882a.5.5 0 0 0 .61.61l6.098-1.458A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.523-5.188-1.432l-.372-.225-3.847.919.944-3.776-.244-.386A9.946 9.946 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        ${ct.tel}
+      </a>`;
+    } else {
+      waBtnEl.innerHTML = '';
+    }
   }
 
   document.getElementById('detail-overlay').classList.add('open');
@@ -2190,7 +2295,10 @@ function renderFocoCard(c, wrap) {
         </div>` : ''}
       </div>
       <div class="foco-footer">
-        <button class="btn btn-ghost btn-sm" onclick="focoEditarAtual()">✏️ Editar curso</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="focoEditarAtual()">✏️ Editar</button>
+          ${(()=>{ const ct=getProfContato(c.professor); return ct&&ct.wa ? `<a class="wa-btn" href="https://wa.me/${ct.wa}" target="_blank" style="text-decoration:none;font-size:11px;padding:5px 10px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#fff;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.52 5.849L.057 23.882a.5.5 0 0 0 .61.61l6.098-1.458A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.896 0-3.67-.523-5.188-1.432l-.372-.225-3.847.919.944-3.776-.244-.386A9.946 9.946 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg> ${ct.tel}</a>` : ''; })()}
+        </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost btn-sm" onclick="focoNav(-1)" ${focoIdx===0?'disabled':''}>← Anterior</button>
           <button class="btn btn-primary btn-sm" onclick="focoNav(1)" ${focoIdx===focoLista.length-1?'disabled':''}>Próximo →</button>
@@ -2225,6 +2333,41 @@ function toggleCheckFoco(id, key) {
   renderStats();
 }
 
+
+// ═══════════════════════════════════════════
+// CONTATOS DOS PROFESSORES
+// ═══════════════════════════════════════════
+const PROFESSORES_CONTATO = {
+  'adriano':                   { tel: '(62) 9 9809-1881', wa: '5562998091881' },
+  'alessandro caetano':        { tel: '(62) 9 8451-1851', wa: '5562984511851' },
+  'alessandro':                { tel: '(62) 9 8451-1851', wa: '5562984511851' },
+  'allan / andré / joão paulo':{ tel: '(62) 9 8152-1889', wa: '5562981521889' },
+  'andrey':                    { tel: '(62) 9 8488-7557', wa: '5562984887557' },
+  'amelina prates':            { tel: '(62) 9 8117-2038', wa: '5562981172038' },
+  'cristal sivadon':           { tel: '(62) 9 8196-6598', wa: '5562981966598' },
+  'deborah cristo':            { tel: '(62) 9 8105-6923', wa: '5562981056923' },
+  'gabriel lira':              { tel: '(62) 9 9821-5517', wa: '5562998215517' },
+  'gabriela matos':            { tel: '(62) 9 8592-2348', wa: '5562985922348' },
+  'josé veloso':               { tel: '(91) 9 9322-5586', wa: '5591993225586' },
+  'jose veloso':               { tel: '(91) 9 9322-5586', wa: '5591993225586' },
+  'kirk douglas':              { tel: '(62) 9 3790-0912', wa: '5562993790912' },
+  'lucas medeiros':            { tel: '(62) 9 8103-3766', wa: '5562981033766' },
+  'lucas medeiro':             { tel: '(62) 9 8103-3766', wa: '5562981033766' },
+  'marcos eduardo':            { tel: '(62) 9 8110-7567', wa: '5562981107567' },
+  'pedro machado':             { tel: '(62) 9 8191-4913', wa: '5562981914913' },
+  'silvio vidal de mirando junior': { tel: '(62) 9 9398-7510', wa: '5562993987510' },
+  'thiago':                    { tel: '(62) 9 8211-4349', wa: '5562982114349' },
+  'vitor resende':             { tel: '(62) 9 8121-2900', wa: '5562981212900' },
+  'welington júlio':           { tel: '(62) 9 8415-4528', wa: '5562984154528' },
+  'welington julio':           { tel: '(62) 9 8415-4528', wa: '5562984154528' },
+  'willian batista':           { tel: '(62) 9 8584-6511', wa: '5562985846511' },
+};
+
+function getProfContato(nome) {
+  if (!nome) return null;
+  const key = nome.toLowerCase().trim();
+  return PROFESSORES_CONTATO[key] || null;
+}
 // ═══════════════════════════════════════════
 // EXPORTAR XML
 // ═══════════════════════════════════════════
@@ -2662,13 +2805,13 @@ function prioLegado(c) {
   return [];
 }
 
-// Migrar ao carregar
+// Migrar ao carregar e forçar re-save
 cursos = cursos.map(c => {
   if (!c.marcadores) c.marcadores = marcadoresLegado(c);
   if (!Array.isArray(c.prioridade)) c.prioridade = prioLegado(c);
   return c;
 });
-salvar();
+salvar(); // garante que dados migrados estão salvos
 
 // Keyboard: ESC fecha modais, setas navegam no foco
 document.addEventListener('keydown', e => {
@@ -2686,6 +2829,14 @@ document.addEventListener('keydown', e => {
 if (cursos.length === 0) {
   cursos = [{"id": "kr8x0jeiqu", "nome": "Montagem e Manutenção de Computadores", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-04", "termino": "2026-05-21", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 109", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "17596", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "chqqnmmfvi", "nome": "Excel Básico - capacitação interna", "empresa": "SENAI", "parceiro": "-", "inicio": "2026-02-25", "termino": "2026-03-06", "ch": "20", "dias": "Segundas, Quartas e Quintas", "horario": "12h30 às 17h30", "vagas": "25", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "Lab 202", "professor": "Adriano", "sige": "Isento - Regimental", "evento": "1059053", "pasta": "20505", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: Via portal do aluno", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "lnjagkg90a", "nome": "Informática Aplicada em Chromebook: Comunicação e Eficiência SEDUC", "empresa": "Colégio de período integral José Luciano", "parceiro": "CEPI José Luciano", "inicio": "2026-03-06", "termino": "2026-03-06", "ch": "8", "dias": "Sexta", "horario": "8h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "- Escola que o Professor atua", "professor": "Welington Júlio", "sige": "Isento - SENAI", "evento": "1062214", "pasta": "21679", "participantes": "6", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Realizado | Certificado: Solicitado p/ secretaria", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "7jmx8m6bj0", "nome": "Montagem e Manutenção em Celular", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-28", "termino": "2026-05-12", "ch": "30", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "15", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "Raul Lucio", "sige": "Comunidade", "evento": "?", "pasta": "17963", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "qz8gn8vp6i", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "", "termino": "2026-03-27", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Planejado da Semana", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "9j43y7tz1r", "nome": "Microsoft Power BI Essencial", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-04-10", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Marcos Eduardo", "sige": "Comunidade", "evento": "1058194", "pasta": "18982", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "e04qfl4e68", "nome": "Microsoft Power BI Essencial", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-05", "termino": "2026-05-22", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "18982", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "v1ruegka0p", "nome": "Excel intermediário e avançado", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "b8frcdx8w1", "nome": "Introdutório de CANVAS - Criando designs incríveis sem ser designer", "empresa": "FIEG", "parceiro": "NUREM / Rayza", "inicio": "2026-03-13", "termino": "2026-03-27", "ch": "20", "dias": "Sexta e Sábado", "horario": "13h30 às 17h30", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Sala 206", "professor": "Gabriel Lira", "sige": "Empresa (fechado)", "evento": "1058140", "pasta": "21398", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Em andamento", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "9vvumuzf9t", "nome": "Academia de Líderes - Direção e Gerência I GESTÃO PARA RESULTADOS", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-05-22", "termino": "2026-06-13", "ch": "36", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "310", "professor": "?", "sige": "Empresa (fechado)", "evento": "1043403", "pasta": "21370", "participantes": "41", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "577relz9zn", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-06", "termino": "2026-04-17", "ch": "40", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "buvhc4aqju", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 1", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "45", "modalidade": "Qualificação", "ambiente": "105", "professor": "Thiago", "sige": "Isento - Regimental", "evento": "1059091", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "2m75t070bg", "nome": "Almoxarifado para Construção Civil", "empresa": "ALMOB", "parceiro": "Almob André", "inicio": "", "termino": "", "ch": "20", "dias": "", "horario": "8h às 17h", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "103", "professor": "Allan / André / João Paulo", "sige": "Comunidade/Empresa (Misto)", "evento": "1060925", "pasta": "19588", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: 9/25 | Certificado: Pendente emissão já sinalizei email no dia 16/03 com resultados gerados", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "mnlz43maoy", "nome": "Academia de Líderes - Supervisão Educacional I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "g9ipx1lu3p", "nome": "Excel intermediário e avançado", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-05-09", "termino": "2026-07-04", "ch": "30", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Kirk Douglas", "sige": "Comunidade", "evento": "?", "pasta": "16748", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "rzexz30rc2", "nome": "Introdução de lógica de programação com Python", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-06-20", "ch": "40", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "-", "sige": "Comunidade", "evento": "1058321", "pasta": "21607", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "knu06cof0e", "nome": "Excel Básico - Superior FATESG", "empresa": "-", "parceiro": "FATESG", "inicio": "2026-03-14", "termino": "2026-04-11", "ch": "20", "dias": "Sábado", "horario": "13h às 18h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 200", "professor": "Vitor Resende", "sige": "Isento - SENAI", "evento": "1062138", "pasta": "20505", "participantes": "20", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "iqh6ouk2xv", "nome": "Excel intermediário e avançado", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-05-16", "ch": "30", "dias": "Sábado", "horario": "8h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 202", "professor": "Kirk Douglas", "sige": "Comunidade", "evento": "1058197", "pasta": "16748", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "401gurbwtc", "nome": "Gestão de Pré-Venda, vendas e pós-vendas", "empresa": "FLY PARTS MANUTENCAO AERONAUTICA LTDA", "parceiro": "SENAI", "inicio": "2026-02-24", "termino": "2026-03-12", "ch": "16", "dias": "Terça e Quinta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 103", "professor": "Cristal Sivadon", "sige": "Empresa (fechado)", "evento": "1059087", "pasta": "21629", "participantes": "15", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: IMPRESSOS E ENTREGUES PARA AÇÃO DE CERIMÔNIA DE ENTREGAS", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "latytgqlar", "nome": "Desenvolvimento de Agentes de Inteligência Artificial (NO CODE)", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-05-05", "ch": "80", "dias": "Segunda a Sexta", "horario": "13h30 às 17h30", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "-", "sige": "Comunidade", "evento": "1058248", "pasta": "21595", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "fjf6ekismt", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 3", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "20", "modalidade": "Qualificação", "ambiente": "Lab 101", "professor": "Andrey", "sige": "Isento - SENAI", "evento": "1061690", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "w4tma81ld0", "nome": "Academia de Líderes", "empresa": "SENAI", "parceiro": "FIEGEmpresa: SENAI", "inicio": "2026-03-20", "termino": "2026-05-16", "ch": "36", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "", "professor": "", "sige": "Empresa (fechado)", "evento": "1043904", "pasta": "21369", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Planejado da Semana", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "zsuhhz6eeh", "nome": "Montagem e Manutenção em Celular", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-23", "termino": "2026-04-07", "ch": "30", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "15", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "Raul Lucio", "sige": "Comunidade", "evento": "1058191", "pasta": "17963", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Planejado da Semana", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "5vwq6l4lal", "nome": "Introdutório de CANVAS - Criando designs incríveis sem ser designer", "empresa": "FIEG", "parceiro": "SENAI", "inicio": "2026-04-11", "termino": "2026-05-23", "ch": "20", "dias": "Sábado", "horario": "08h às 12h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "?", "professor": "Gabriel Lira", "sige": "Empresa (fechado)", "evento": "1058330", "pasta": "21398", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "yf5pq0hr1c", "nome": "Academia de Líderes - Coordenação STI I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "82m93ggldp", "nome": "Academia de Líderes - Supervisão Técnica I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "s85bcmdq2t", "nome": "Assistente de Desenvolvimento de Inteligência Artificial Comunidade", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-23", "termino": "2026-05-07", "ch": "200 HR", "dias": "Segunda a Sexta", "horario": "13h30 às 17h30", "vagas": "45", "modalidade": "Qualificação", "ambiente": "Lab 105", "professor": "Lucas Medeiros", "sige": "Isento - Regimental", "evento": "1058092", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "7qi4zsu8xy", "nome": "Operação de Drones Profissionais", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-28", "termino": "2026-03-29", "ch": "16", "dias": "Sab e Dom", "horario": "08h às 17h", "vagas": "16", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "-", "sige": "Comunidade", "evento": "1057884", "pasta": "19545", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "z32vlsyflk", "nome": "Formação nas novas Tecnologias emergentes de componentes de informática", "empresa": "FUJIOKA ELETRO IMAGEM S/A", "parceiro": "Fujioka", "inicio": "2026-03-04", "termino": "2026-03-06", "ch": "24", "dias": "Quarta a Sexta", "horario": "8h às 17h", "vagas": "12", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "Lab 109", "professor": "José Veloso", "sige": "Empresa (fechado)", "evento": "1061458", "pasta": "17274", "participantes": "8", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: Realizado | Certificado: Solicitado p/ secretaria", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "i0k3950roa", "nome": "Operação de Drones Profissionais", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "jhnnzzgkpx", "nome": "Operação de Drones Profissionais", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "71ym0ozchc", "nome": "Academia de Líderes - Direção I PAINEL ESTRATÉGICO E GOVERNANÇA", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-08-14", "termino": "2026-08-15", "ch": "16", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "30", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "309", "professor": "?", "sige": "Empresa (fechado)", "evento": "1043403", "pasta": "21370", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}, {"id": "3s74stwrtj", "nome": "Montagem e Manutenção de Computadores", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-03-30", "termino": "2026-05-11", "ch": "80", "dias": "Segunda a Sexta", "horario": "19h às 22h", "vagas": "20", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 109", "professor": "-", "sige": "Comunidade", "evento": "1058713", "pasta": "17596", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "a3sp67t412", "nome": "Assistente de Desenvolvimento de Inteligência Artificial (SÁBADOS) Turma 2", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "SENAI", "inicio": "2026-02-28", "termino": "2026-11-14", "ch": "200", "dias": "Sábado", "horario": "08h às 17h", "vagas": "45", "modalidade": "Qualificação", "ambiente": "Lab 101", "professor": "Andrey", "sige": "Isento - Regimental", "evento": "1060602", "pasta": "20983", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: -", "bucket_original": "Em andamento", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "6bedla3za8", "nome": "Assistente de Desenvolvimento de Agentes Inteligentes", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Em andamento", "prioridade": "Urgente", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "0m8vibuj4d", "nome": "Inteligência Artificial na Gestão de Negócios", "empresa": "Prefeitura de Goiânia", "parceiro": "SENAI", "inicio": "2026-03-11", "termino": "2026-03-11", "ch": "4", "dias": "Quarta", "horario": "13h30 às 18h30", "vagas": "25", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Anfiteatro", "professor": "Alessandro Caetano", "sige": "Isento - SENAI", "evento": "1063073", "pasta": "19341", "participantes": "0", "obs": "Matrícula: Realizado | Publicação: Não | Avaliação: REALIZADA | Certificado: SOLICITADO P/ SECRETARIA", "bucket_original": "Concluídos", "prioridade": "Baixa", "checklist": {"matricula": true, "publicacao": false, "avaliacao": true, "certificado": true}}, {"id": "1qty08klu2", "nome": "Academia de Líderes - Supervisão Administrativa I GESTÃO PARA RESULTADOS", "empresa": "", "parceiro": "", "inicio": "", "termino": "", "ch": "", "dias": "", "horario": "", "vagas": "", "modalidade": "", "ambiente": "", "professor": "", "sige": "", "evento": "", "pasta": "", "participantes": "", "obs": "Matrícula:  | Publicação:  | Avaliação:  | Certificado: ", "bucket_original": "Aguardando Terceiros", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": false}}, {"id": "0jpp5a2f3s", "nome": "Operação de Drones Profissionais", "empresa": "Comunidade/Empresa (Misto)", "parceiro": "Equipe CVM - B2C", "inicio": "2026-04-25", "termino": "2026-04-26", "ch": "16", "dias": "Sáb e Dom", "horario": "08h às 17h", "vagas": "16", "modalidade": "Aperfeiçoamento Comunidade", "ambiente": "Lab 303", "professor": "-", "sige": "Comunidade", "evento": "?", "pasta": "19545", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Sim | Avaliação: Pendente | Certificado: -", "bucket_original": "Não Iniciado", "prioridade": "Baixa", "checklist": {"matricula": false, "publicacao": true, "avaliacao": false, "certificado": false}}, {"id": "fyz2obkwc9", "nome": "Academia de Líderes - Supervisão I GESTÃO PARA RESULTADOS", "empresa": "SENAI", "parceiro": "FIEG", "inicio": "2026-04-24", "termino": "2026-05-09", "ch": "24", "dias": "Sexta e Sábado", "horario": "19h às 22h / 07h às 17h", "vagas": "40", "modalidade": "Aperfeiçoamento Empresas", "ambiente": "310", "professor": "?", "sige": "Empresa (fechado)", "evento": "?", "pasta": "?", "participantes": "0", "obs": "Matrícula: Pendente | Publicação: Não | Avaliação: Pendente | Certificado: Pendente emissão", "bucket_original": "Não Iniciado", "prioridade": "Média", "checklist": {"matricula": false, "publicacao": false, "avaliacao": false, "certificado": true}}];
   salvar();
+}
+
+// Versão do app — incrementar força reload do localStorage
+const APP_VERSION = '3.0';
+if (localStorage.getItem('senai_app_version') !== APP_VERSION) {
+  // Preserva os cursos mas força re-render com novo código
+  localStorage.setItem('senai_app_version', APP_VERSION);
+  // Se não tiver cursos salvos ainda, não faz nada
 }
 
 // INICIAR
